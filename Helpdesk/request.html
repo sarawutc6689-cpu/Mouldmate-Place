@@ -6,39 +6,84 @@
 <title>แจ้งซ่อม | ระบบแจ้งซ่อมอาคารและสถานที่</title>
 <style>
   * { box-sizing: border-box; margin:0; padding:0; font-family: 'Sarabun', 'Segoe UI', sans-serif; }
-  body { background:#f4f6f8; color:#1e293b; display:flex; min-height:100vh; }
-  
-  .sidebar { width:240px; background:#1e293b; color:#fff; display:flex; flex-direction:column; position:fixed; height:100vh; }
-  .sidebar-header { padding:20px; border-bottom:1px solid #334155; }
-  .sidebar-menu { display:flex; flex-direction:column; padding:10px 0; flex:1; }
-  .sidebar-menu a { padding:12px 20px; color:#cbd5e1; text-decoration:none; font-size:15px; display:block; }
-  .sidebar-menu a:hover, .sidebar-menu a.active { background:#334155; color:#fff; }
+  body { background:#f0f9ff; color:#1e293b; display:flex; min-height:100vh; }
+
+  .sidebar {
+    width:240px;
+    background:linear-gradient(180deg, #0f766e 0%, #115e59 100%);
+    color:#fff; display:flex; flex-direction:column;
+    position:fixed; height:100vh;
+    box-shadow:2px 0 12px rgba(0,0,0,.08);
+  }
+  .sidebar-header { padding:22px 20px; border-bottom:1px solid rgba(255,255,255,.15); }
+  .sidebar-header h2 { font-size:17px; font-weight:700; letter-spacing:.3px; }
+  .sidebar-menu { display:flex; flex-direction:column; padding:12px 0; flex:1; }
+  .sidebar-menu a {
+    padding:12px 20px; color:#ccfbf1; text-decoration:none;
+    font-size:14.5px; display:block; margin:2px 10px; border-radius:8px;
+    transition:all .2s ease;
+  }
+  .sidebar-menu a:hover { background:rgba(255,255,255,.12); color:#fff; transform:translateX(2px); }
+  .sidebar-menu a.active { background:#14b8a6; color:#fff; font-weight:600; box-shadow:0 4px 10px rgba(20,184,166,.35); }
 
   .content { margin-left:240px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
   .page-body { flex:1; padding:30px; }
-  
-  .card { background:#fff; border-radius:10px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.08); margin-bottom:20px; max-width:700px; }
+  h1 { font-size:24px; color:#0f766e; font-weight:700; }
+
+  .card {
+    background:#fff; border-radius:14px; padding:22px;
+    box-shadow:0 4px 16px rgba(15,118,110,.06);
+    border:1px solid #e0f2f1; margin-bottom:20px; max-width:700px;
+  }
   .form-group { margin-bottom:16px; }
-  .form-group label { display:block; margin-bottom:6px; font-weight:600; font-size:14px; }
-  .form-group input, .form-group select, .form-group textarea { width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; }
-  .btn { padding:10px 20px; border:none; border-radius:6px; cursor:pointer; font-size:14px; }
-  .btn-primary { background:#2563eb; color:#fff; width:100%; }
+  .form-group label { display:block; margin-bottom:6px; font-weight:600; font-size:14px; color:#334155; }
+  .form-group input, .form-group select, .form-group textarea {
+    width:100%; padding:10px 12px; border:1px solid #cbd5e1;
+    border-radius:9px; font-size:14px; background:#f8fafc; transition:all .2s;
+    font-family: inherit;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline:none; border-color:#14b8a6; background:#fff;
+    box-shadow:0 0 0 3px rgba(20,184,166,.15);
+  }
+  .btn {
+    padding:11px 20px; border:none; border-radius:10px;
+    cursor:pointer; font-size:14px; font-weight:600;
+    transition:all .2s;
+  }
+  .btn-primary {
+    background:linear-gradient(135deg,#14b8a6,#0f766e); color:#fff; width:100%;
+  }
+  .btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(20,184,166,.35); }
 
-  table { width:100%; border-collapse:collapse; margin-top:10px; }
-  th, td { padding:10px; border-bottom:1px solid #e2e8f0; text-align:left; font-size:14px; }
-  th { background:#f1f5f9; }
+  table { width:100%; border-collapse:collapse; margin-top:12px; }
+  th, td { padding:12px 10px; border-bottom:1px solid #e0f2f1; text-align:left; font-size:14px; }
+  th { background:#ccfbf1; color:#0f766e; font-weight:700; font-size:13px; }
+  tr:hover td { background:#f0fdfa; }
 
-  .badge { padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600; display:inline-block; }
-  .badge-pending { background:#fef9c3; color:#854d0e; }
-  .badge-approved { background:#dbeafe; color:#1e40af; }
-  .badge-in_progress { background:#e0e7ff; color:#4338ca; }
-  .badge-completed { background:#dcfce7; color:#166534; }
-  .badge-rejected { background:#fee2e2; color:#991b1b; }
+  .badge { padding:5px 12px; border-radius:20px; font-size:12px; font-weight:700; display:inline-block; }
+  .badge-pending    { background:#fef3c7; color:#92400e; }
+  .badge-approved   { background:#dbeafe; color:#1e40af; }
+  .badge-in_progress{ background:#e0e7ff; color:#4338ca; }
+  .badge-completed  { background:#d1fae5; color:#065f46; }
+  .badge-rejected   { background:#fee2e2; color:#991b1b; }
 
-  .app-footer { text-align:center; padding:15px; font-size:13px; color:#94a3b8; border-top:1px solid #e2e8f0; background:#fff; }
+  .app-footer {
+    text-align:center; padding:16px; font-size:13px;
+    color:#64748b; border-top:1px solid #e0f2f1; background:#fff;
+  }
+
   .tabs { display:flex; gap:10px; margin-bottom:20px; }
-  .tab-btn { padding:8px 16px; border:none; background:#e2e8f0; border-radius:6px; cursor:pointer; font-weight:600; font-size:14px; }
-  .tab-btn.active { background:#2563eb; color:#fff; }
+  .tab-btn {
+    padding:9px 18px; border:none; background:#e0f2f1; color:#0f766e;
+    border-radius:9px; cursor:pointer; font-weight:600; font-size:14px;
+    transition:all .2s;
+  }
+  .tab-btn:hover { background:#ccfbf1; }
+  .tab-btn.active {
+    background:linear-gradient(135deg,#14b8a6,#0f766e); color:#fff;
+    box-shadow:0 4px 12px rgba(20,184,166,.3);
+  }
   .tab-content { display:none; }
   .tab-content.active { display:block; }
 </style>
@@ -76,8 +121,8 @@
               <input type="text" id="empCode" placeholder="กรอกรหัสพนักงานแล้วคลิกออกนอกช่อง" required>
               <small id="empStatus" style="font-weight:600;"></small>
             </div>
-            <div class="form-group"><label>ชื่อ-นามสกุล</label><input type="text" id="empName" readonly style="background:#f8fafc;"></div>
-            <div class="form-group"><label>แผนก/ส่วนงาน</label><input type="text" id="empSection" readonly style="background:#f8fafc;"></div>
+            <div class="form-group"><label>ชื่อ-นามสกุล</label><input type="text" id="empName" readonly style="background:#f1f5f9; color:#64748b;"></div>
+            <div class="form-group"><label>แผนก/ส่วนงาน</label><input type="text" id="empSection" readonly style="background:#f1f5f9; color:#64748b;"></div>
             <div class="form-group">
               <label>สถานที่แจ้งซ่อม</label>
               <select id="locationSelect" required><option value="">-- เลือกสถานที่ --</option></select>
@@ -86,10 +131,10 @@
               <label>รายละเอียดปัญหา</label>
               <textarea id="description" rows="4" placeholder="อธิบายอาการหรือปัญหาที่พบ" required></textarea>
             </div>
-            <button type="submit" class="btn btn-primary" id="submitBtn">ส่งแจ้งซ่อม</button>
+            <button type="submit" class="btn btn-primary" id="submitBtn">📤 ส่งแจ้งซ่อม</button>
           </form>
         </div>
-        <div class="card" id="resultBox" style="display:none; background:#f0fdf4; border:1px solid #bbf7d0;">
+        <div class="card" id="resultBox" style="display:none; background:#f0fdf4; border:1px solid #86efac; max-width:700px;">
           <h3 style="color:#166534; margin-bottom:8px;">✅ แจ้งซ่อมสำเร็จ</h3>
           <p>เลขที่เอกสารของคุณคือ: <strong id="resultDocNo" style="font-size:18px; color:#15803d;"></strong></p>
         </div>
@@ -102,10 +147,10 @@
             <div class="form-group" style="flex:1; margin-bottom:0;"><label>เลขที่เอกสาร</label><input type="text" id="trackDocNo" placeholder="PL-YYMMDD-XXXX"></div>
             <div class="form-group" style="flex:1; margin-bottom:0;"><label>รหัสพนักงาน</label><input type="text" id="trackEmpCode" placeholder="รหัสพนักงาน"></div>
           </div>
-          <button class="btn btn-primary" onclick="trackRepair()" style="width:auto;">ค้นหาข้อมูล</button>
+          <button class="btn btn-primary" onclick="trackRepair()" style="width:auto;">🔍 ค้นหาข้อมูล</button>
         </div>
         <div class="card" style="max-width:100%;">
-          <h3>ผลการค้นหา</h3>
+          <h3 style="color:#0f766e; font-size:16px;">ผลการค้นหา</h3>
           <table>
             <thead><tr><th>เลขที่เอกสาร</th><th>รายละเอียด</th><th>สถานะ</th><th>วันที่แจ้ง</th></tr></thead>
             <tbody id="trackResultList"><tr><td colspan="4" style="text-align:center; color:#94a3b8;">กรุณากรอกข้อมูลเพื่อค้นหา</td></tr></tbody>
@@ -144,10 +189,10 @@
       const { data } = await supabaseClient.from('employees').select('emp_code, name, section').eq('emp_code', code).maybeSingle();
       if (!data) {
         foundEmp = null; document.getElementById('empName').value = ''; document.getElementById('empSection').value = '';
-        statusEl.textContent = '❌ ไม่พบรหัสพนักงาน'; statusEl.style.color = 'red';
+        statusEl.textContent = '❌ ไม่พบรหัสพนักงาน'; statusEl.style.color = '#dc2626';
       } else {
         foundEmp = data; document.getElementById('empName').value = data.name; document.getElementById('empSection').value = data.section;
-        statusEl.textContent = '✅ พบข้อมูล'; statusEl.style.color = 'green';
+        statusEl.textContent = '✅ พบข้อมูล'; statusEl.style.color = '#16a34a';
       }
     });
 
@@ -171,7 +216,7 @@
       const tbody = document.getElementById('trackResultList');
       const { data } = await supabaseClient.rpc('track_repair_request', { p_document_no: doc, p_emp_code: emp });
       tbody.innerHTML = '';
-      if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:red;">ไม่พบข้อมูล</td></tr>'; return; }
+      if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#dc2626;">ไม่พบข้อมูล</td></tr>'; return; }
       data.forEach(i => {
         tbody.innerHTML += `<tr><td><strong>${i.document_no}</strong></td><td>${i.description}</td><td><span class="badge badge-${i.status}">${i.status}</span></td><td>${new Date(i.created_at).toLocaleString('th-TH')}</td></tr>`;
       });
