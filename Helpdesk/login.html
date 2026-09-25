@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>เข้าสู่ระบบ | ระบบแจ้งซ่อมอาคารและสถานที่</title>
+<style>
+  * { box-sizing: border-box; margin:0; padding:0; font-family: 'Sarabun', sans-serif; }
+  body { background:#f4f6f8; color:#1e293b; display:flex; justify-content:center; align-items:center; min-height:100vh; flex-direction:column; }
+  .card { background:#fff; border-radius:10px; padding:30px; box-shadow:0 1px 3px rgba(0,0,0,.08); width:360px; margin-bottom:20px; }
+  .form-group { margin-bottom:16px; }
+  .form-group label { display:block; margin-bottom:6px; font-weight:600; font-size:14px; }
+  .form-group input { width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; }
+  .btn { padding:10px; border:none; border-radius:6px; cursor:pointer; font-size:14px; width:100%; background:#2563eb; color:#fff; }
+  .app-footer { font-size:13px; color:#94a3b8; text-align:center; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h2 style="margin-bottom:20px; font-size:20px;">เข้าสู่ระบบจัดการ</h2>
+    <form id="loginForm">
+      <div class="form-group"><label>อีเมล</label><input type="email" id="email" required></div>
+      <div class="form-group"><label>รหัสผ่าน</label><input type="password" id="password" required></div>
+      <button type="submit" class="btn">เข้าสู่ระบบ</button>
+      <p id="errorMsg" style="color:red; margin-top:10px; font-size:13px;"></p>
+    </form>
+    <div style="margin-top:15px; text-align:center;">
+      <a href="request.html" style="font-size:13px; color:#2563eb; text-decoration:none;">← กลับไปหน้าแจ้งซ่อมทั่วไป</a>
+    </div>
+  </div>
+  <footer class="app-footer">ระบบแจ้งซ่อมอาคารและสถานที่ | พัฒนาโดย Sarawut.C</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://fuarmmweqxxhczavkvqp.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1YXJtbXdlcXh4aGN6YXZrdnFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMjgzMTcsImV4cCI6MjEwMzgwNDMxN30.n7s4gKOkCvaOSpFSf9FGmWsqi7eAzFe28c_oJWy8NSE";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) { document.getElementById('errorMsg').textContent = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'; return; }
+      window.location.href = 'dashboard.html';
+    });
+  </script>
+</body>
+</html>
