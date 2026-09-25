@@ -4,34 +4,68 @@
 <meta charset="UTF-8">
 <title>จัดการสถานที่ | ระบบแจ้งซ่อมอาคารและสถานที่</title>
 <style>
-  * { box-sizing: border-box; margin:0; padding:0; font-family: 'Sarabun', sans-serif; }
-  body { background:#f4f6f8; color:#1e293b; display:flex; min-height:100vh; }
-  
-  .sidebar { width:240px; background:#1e293b; color:#fff; display:flex; flex-direction:column; position:fixed; height:100vh; }
-  .sidebar-header { padding:20px; border-bottom:1px solid #334155; }
-  .sidebar-menu { display:flex; flex-direction:column; padding:10px 0; flex:1; }
-  .sidebar-menu a { padding:12px 20px; color:#cbd5e1; text-decoration:none; font-size:15px; display:block; }
-  .sidebar-menu a:hover, .sidebar-menu a.active { background:#334155; color:#fff; }
-  
+  * { box-sizing: border-box; margin:0; padding:0; font-family: 'Sarabun', 'Segoe UI', sans-serif; }
+  body { background:#f0f9ff; color:#1e293b; display:flex; min-height:100vh; }
+
+  .sidebar {
+    width:240px;
+    background:linear-gradient(180deg, #0f766e 0%, #115e59 100%);
+    color:#fff; display:flex; flex-direction:column;
+    position:fixed; height:100vh;
+    box-shadow:2px 0 12px rgba(0,0,0,.08);
+  }
+  .sidebar-header { padding:22px 20px; border-bottom:1px solid rgba(255,255,255,.15); }
+  .sidebar-header h2 { font-size:17px; font-weight:700; letter-spacing:.3px; }
+  .sidebar-menu { display:flex; flex-direction:column; padding:12px 0; flex:1; }
+  .sidebar-menu a {
+    padding:12px 20px; color:#ccfbf1; text-decoration:none;
+    font-size:14.5px; display:block; margin:2px 10px; border-radius:8px;
+    transition:all .2s ease;
+  }
+  .sidebar-menu a:hover { background:rgba(255,255,255,.12); color:#fff; transform:translateX(2px); }
+  .sidebar-menu a.active { background:#14b8a6; color:#fff; font-weight:600; box-shadow:0 4px 10px rgba(20,184,166,.35); }
+
   .content { margin-left:240px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
   .page-body { flex:1; padding:30px; }
-  
-  .card { background:#fff; border-radius:10px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.08); margin-bottom:20px; }
+  h1 { font-size:24px; color:#0f766e; font-weight:700; }
+
+  .card {
+    background:#fff; border-radius:14px; padding:22px;
+    box-shadow:0 4px 16px rgba(15,118,110,.06);
+    border:1px solid #e0f2f1; margin-bottom:20px;
+  }
   .form-group { margin-bottom:14px; }
-  .form-group label { display:block; margin-bottom:4px; font-weight:600; font-size:13px; }
-  .form-group input { width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; }
-  
-  .btn { padding:8px 16px; border:none; border-radius:6px; cursor:pointer; font-size:14px; }
-  .btn-primary { background:#2563eb; color:#fff; }
-  .btn-warning { background:#d97706; color:#fff; }
-  .btn-danger { background:#dc2626; color:#fff; }
-  .btn-secondary { background:#64748b; color:#fff; }
+  .form-group label { display:block; margin-bottom:5px; font-weight:600; font-size:13px; color:#334155; }
+  .form-group input {
+    width:100%; padding:10px 12px; border:1px solid #cbd5e1;
+    border-radius:9px; font-size:14px; background:#f8fafc; transition:all .2s;
+  }
+  .form-group input:focus {
+    outline:none; border-color:#14b8a6; background:#fff;
+    box-shadow:0 0 0 3px rgba(20,184,166,.15);
+  }
 
-  table { width:100%; border-collapse:collapse; margin-top:10px; }
-  th, td { padding:10px; border-bottom:1px solid #e2e8f0; text-align:left; font-size:14px; }
-  th { background:#f1f5f9; }
+  .btn {
+    padding:9px 18px; border:none; border-radius:9px;
+    cursor:pointer; font-size:13.5px; font-weight:600;
+    transition:all .2s;
+  }
+  .btn:hover { transform:translateY(-1px); box-shadow:0 4px 10px rgba(0,0,0,.12); }
+  .btn-primary { background:linear-gradient(135deg,#14b8a6,#0f766e); color:#fff; }
+  .btn-primary:hover { box-shadow:0 6px 16px rgba(20,184,166,.35); }
+  .btn-warning { background:#f59e0b; color:#fff; }
+  .btn-danger { background:#ef4444; color:#fff; }
+  .btn-secondary { background:#94a3b8; color:#fff; }
 
-  .app-footer { text-align:center; padding:15px; font-size:13px; color:#94a3b8; border-top:1px solid #e2e8f0; background:#fff; }
+  table { width:100%; border-collapse:collapse; margin-top:12px; }
+  th, td { padding:12px 10px; border-bottom:1px solid #e0f2f1; text-align:left; font-size:14px; }
+  th { background:#ccfbf1; color:#0f766e; font-weight:700; font-size:13px; }
+  tr:hover td { background:#f0fdfa; }
+
+  .app-footer {
+    text-align:center; padding:16px; font-size:13px;
+    color:#64748b; border-top:1px solid #e0f2f1; background:#fff;
+  }
 </style>
 </head>
 <body>
@@ -54,7 +88,7 @@
       <p style="color:#64748b; margin-bottom:20px; font-size:14px;">เพิ่ม แก้ไข หรือลบสถานที่สำหรับใช้ในฟอร์มแจ้งซ่อม</p>
 
       <div class="card" style="max-width:500px;">
-        <h3 id="formTitle" style="margin-bottom:15px;">➕ เพิ่มสถานที่ใหม่</h3>
+        <h3 id="formTitle" style="margin-bottom:15px; color:#0f766e; font-size:16px;">➕ เพิ่มสถานที่ใหม่</h3>
         <form id="locationForm">
           <input type="hidden" id="locId">
           <div class="form-group">
@@ -77,7 +111,7 @@
       </div>
 
       <div class="card">
-        <h3>รายการสถานที่ทั้งหมด</h3>
+        <h3 style="color:#0f766e; font-size:16px;">รายการสถานที่ทั้งหมด</h3>
         <table>
           <thead>
             <tr>
@@ -93,7 +127,7 @@
         </table>
       </div>
     </div>
-    
+
     <footer class="app-footer">
       ระบบแจ้งซ่อมอาคารและสถานที่ | พัฒนาโดย Sarawut.C
     </footer>
@@ -105,13 +139,9 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1YXJtbXdlcXh4aGN6YXZrdnFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMjgzMTcsImV4cCI6MjEwMzgwNDMxN30.n7s4gKOkCvaOSpFSf9FGmWsqi7eAzFe28c_oJWy8NSE";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ตรวจสอบสิทธิ์การเข้าสู่ระบบ
     async function checkAuth() {
       const { data: { session } } = await supabaseClient.auth.getSession();
-      if (!session) {
-        window.location.href = 'login.html';
-        return;
-      }
+      if (!session) { window.location.href = 'login.html'; return; }
       loadLocations();
     }
     checkAuth();
@@ -121,7 +151,6 @@
       window.location.href = 'login.html';
     }
 
-    // โหลดข้อมูลสถานที่ทั้งหมด
     async function loadLocations() {
       const { data, error } = await supabaseClient
         .from('repair_locations')
@@ -143,15 +172,14 @@
             <td>${loc.floor}</td>
             <td>${loc.room}</td>
             <td>
-              <button class="btn btn-warning" style="padding:4px 8px; font-size:12px;" onclick="editLocation('${loc.id}', '${loc.building}', '${loc.floor}', '${loc.room}')">แก้ไข</button>
-              <button class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="deleteLocation('${loc.id}')">ลบ</button>
+              <button class="btn btn-warning" style="padding:5px 10px; font-size:12px;" onclick="editLocation('${loc.id}', '${loc.building}', '${loc.floor}', '${loc.room}')">แก้ไข</button>
+              <button class="btn btn-danger" style="padding:5px 10px; font-size:12px;" onclick="deleteLocation('${loc.id}')">ลบ</button>
             </td>
           </tr>
         `;
       });
     }
 
-    // บันทึกข้อมูล (เพิ่มใหม่ หรือ อัปเดต)
     document.getElementById('locationForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const id = document.getElementById('locId').value;
@@ -160,20 +188,16 @@
       const room = document.getElementById('room').value.trim();
 
       if (id) {
-        // อัปเดตข้อมูลเดิม
         const { error } = await supabaseClient
           .from('repair_locations')
           .update({ building, floor, room })
           .eq('id', id);
-
         if (error) { alert('เกิดข้อผิดพลาด: ' + error.message); return; }
         alert('อัปเดตข้อมูลสำเร็จ');
       } else {
-        // เพิ่มข้อมูลใหม่
         const { error } = await supabaseClient
           .from('repair_locations')
           .insert([{ building, floor, room }]);
-
         if (error) { alert('เกิดข้อผิดพลาด: ' + error.message); return; }
         alert('เพิ่มสถานที่สำเร็จ');
       }
@@ -182,7 +206,6 @@
       loadLocations();
     });
 
-    // นำข้อมูลใส่ฟอร์มเพื่อแก้ไข
     function editLocation(id, building, floor, room) {
       document.getElementById('locId').value = id;
       document.getElementById('building').value = building;
@@ -194,15 +217,12 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // ลบสถานที่
     async function deleteLocation(id) {
       if (!confirm('คุณต้องการลบสถานที่นี้ใช่หรือไม่?')) return;
-
       const { error } = await supabaseClient
         .from('repair_locations')
         .delete()
         .eq('id', id);
-
       if (error) {
         alert('ไม่สามารถลบได้ เนื่องจากอาจมีประวัติการแจ้งซ่อมผูกอยู่กับสถานที่นี้');
         return;
@@ -210,7 +230,6 @@
       loadLocations();
     }
 
-    // ล้างฟอร์มกลับเป็นโหมดเพิ่มใหม่
     function resetForm() {
       document.getElementById('locationForm').reset();
       document.getElementById('locId').value = '';
