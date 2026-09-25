@@ -3,75 +3,162 @@
 <head>
 <meta charset="UTF-8">
 <title>เข้าสู่ระบบ | ระบบแจ้งซ่อมอาคารและสถานที่</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin:0; padding:0; font-family: 'Sarabun', 'Segoe UI', sans-serif; }
+  * { box-sizing: border-box; margin:0; padding:0; font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif; }
+
   body {
-    background: linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 100%);
-    color:#1e293b; display:flex; justify-content:center; align-items:center;
-    min-height:100vh; flex-direction:column;
+    min-height:100vh; display:flex; justify-content:center; align-items:center;
+    flex-direction:column; padding:20px;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(139,92,246,.18), transparent 45%),
+      radial-gradient(circle at 80% 80%, rgba(236,72,153,.15), transparent 45%),
+      radial-gradient(circle at 80% 20%, rgba(6,182,212,.15), transparent 40%),
+      linear-gradient(135deg, #f5f7ff 0%, #eef2ff 50%, #faf5ff 100%);
+    color:#1e1b4b;
+    overflow:hidden; position:relative;
   }
-  .card {
-    background:#fff; border-radius:16px; padding:34px 30px;
-    box-shadow:0 8px 30px rgba(15,118,110,.12);
-    border:1px solid #e0f2f1;
-    width:380px; margin-bottom:20px;
+  /* floating blobs */
+  body::before, body::after {
+    content:''; position:absolute; border-radius:50%; filter:blur(60px); opacity:.5; z-index:0;
+    animation: float 12s ease-in-out infinite;
   }
-  .card h2 {
-    margin-bottom:22px; font-size:20px; color:#0f766e;
-    text-align:center; font-weight:700;
+  body::before { width:320px; height:320px; background:linear-gradient(135deg,#a78bfa,#6366f1); top:-80px; left:-80px; }
+  body::after  { width:280px; height:280px; background:linear-gradient(135deg,#f472b6,#ec4899); bottom:-80px; right:-60px; animation-delay:-6s; }
+  @keyframes float {
+    0%,100% { transform: translate(0,0) scale(1); }
+    50%     { transform: translate(30px,-30px) scale(1.08); }
   }
-  .logo-box {
-    width:64px; height:64px; margin:0 auto 14px;
-    background:linear-gradient(135deg,#14b8a6,#0f766e);
-    border-radius:16px; display:flex; align-items:center; justify-content:center;
-    font-size:30px; box-shadow:0 6px 16px rgba(20,184,166,.35);
+
+  .login-wrap {
+    position:relative; z-index:1;
+    background:rgba(255,255,255,.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border:1px solid rgba(255,255,255,.9);
+    border-radius:24px;
+    padding:42px 36px;
+    width:100%; max-width:420px;
+    box-shadow:
+      0 20px 60px rgba(99,102,241,.15),
+      0 4px 12px rgba(0,0,0,.04);
+    animation: cardIn .6s cubic-bezier(.4,0,.2,1);
   }
-  .form-group { margin-bottom:16px; }
+  @keyframes cardIn {
+    from { opacity:0; transform: translateY(20px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  .logo-badge {
+    width:72px; height:72px; margin:0 auto 18px;
+    background:linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899);
+    border-radius:22px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:34px;
+    box-shadow:0 12px 28px rgba(99,102,241,.35);
+    animation: pulse 3s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { transform: scale(1); box-shadow:0 12px 28px rgba(99,102,241,.35); }
+    50%     { transform: scale(1.04); box-shadow:0 16px 34px rgba(236,72,153,.4); }
+  }
+
+  h2 {
+    text-align:center; font-size:22px; font-weight:700;
+    margin-bottom:6px;
+    background:linear-gradient(135deg,#4f46e5,#ec4899);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .subtitle {
+    text-align:center; font-size:13.5px; color:#64748b;
+    margin-bottom:28px;
+  }
+
+  .form-group { margin-bottom:18px; }
   .form-group label {
-    display:block; margin-bottom:6px; font-weight:600;
-    font-size:13.5px; color:#334155;
+    display:block; margin-bottom:8px; font-weight:600;
+    font-size:13.5px; color:#475569;
   }
   .form-group input {
-    width:100%; padding:11px 13px; border:1px solid #cbd5e1;
-    border-radius:10px; font-size:14px; transition:all .2s;
+    width:100%; padding:13px 16px;
+    border:1.5px solid #e2e8f0;
+    border-radius:12px; font-size:14.5px;
     background:#f8fafc;
+    transition: all .25s cubic-bezier(.4,0,.2,1);
+    font-family: inherit;
   }
   .form-group input:focus {
-    outline:none; border-color:#14b8a6; background:#fff;
-    box-shadow:0 0 0 3px rgba(20,184,166,.15);
+    outline:none; border-color:#6366f1; background:#fff;
+    box-shadow: 0 0 0 4px rgba(99,102,241,.12);
+    transform: translateY(-1px);
   }
-  .btn {
-    padding:12px; border:none; border-radius:10px; cursor:pointer;
-    font-size:14.5px; width:100%; font-weight:700;
-    background:linear-gradient(135deg,#14b8a6,#0f766e);
-    color:#fff; transition:all .2s; letter-spacing:.3px;
+
+  .btn-login {
+    width:100%; padding:14px; border:none; border-radius:12px;
+    cursor:pointer; font-size:15px; font-weight:700;
+    color:#fff; letter-spacing:.3px;
+    background:linear-gradient(135deg,#6366f1,#8b5cf6);
+    transition: all .25s cubic-bezier(.4,0,.2,1);
+    box-shadow:0 8px 20px rgba(99,102,241,.35);
+    font-family: inherit;
   }
-  .btn:hover {
-    transform:translateY(-1px);
-    box-shadow:0 8px 20px rgba(20,184,166,.35);
+  .btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow:0 14px 28px rgba(99,102,241,.45);
+    background:linear-gradient(135deg,#4f46e5,#7c3aed);
   }
-  .app-footer { font-size:13px; color:#94a3b8; text-align:center; }
+  .btn-login:active { transform: translateY(0); }
+
+  .error-msg {
+    color:#dc2626; margin-top:14px; font-size:13px;
+    text-align:center; font-weight:600;
+    padding:10px; border-radius:10px;
+    background:#fef2f2; border:1px solid #fecaca;
+    display:none;
+  }
+  .error-msg.show { display:block; animation: shake .4s; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25%     { transform: translateX(-6px); }
+    75%     { transform: translateX(6px); }
+  }
+
   .back-link {
-    display:inline-block; margin-top:16px; font-size:13px;
-    color:#0f766e; text-decoration:none; font-weight:600;
+    display:block; text-align:center; margin-top:20px;
+    font-size:13.5px; color:#6366f1; text-decoration:none;
+    font-weight:600; transition:all .2s;
   }
-  .back-link:hover { text-decoration:underline; }
-  #errorMsg { color:#dc2626; margin-top:10px; font-size:13px; text-align:center; }
+  .back-link:hover { color:#4f46e5; transform: translateX(-3px); }
+
+  .app-footer {
+    position:relative; z-index:1;
+    margin-top:24px; font-size:12.5px;
+    color:#94a3b8; text-align:center;
+  }
 </style>
 </head>
 <body>
-  <div class="card">
-    <div class="logo-box">🛠️</div>
-    <h2>เข้าสู่ระบบจัดการ</h2>
+  <div class="login-wrap">
+    <div class="logo-badge">🛠️</div>
+    <h2>ยินดีต้อนรับ</h2>
+    <p class="subtitle">เข้าสู่ระบบจัดการแจ้งซ่อม</p>
+
     <form id="loginForm">
-      <div class="form-group"><label>อีเมล</label><input type="email" id="email" required></div>
-      <div class="form-group"><label>รหัสผ่าน</label><input type="password" id="password" required></div>
-      <button type="submit" class="btn">เข้าสู่ระบบ</button>
-      <p id="errorMsg"></p>
+      <div class="form-group">
+        <label>อีเมล</label>
+        <input type="email" id="email" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group">
+        <label>รหัสผ่าน</label>
+        <input type="password" id="password" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn-login">เข้าสู่ระบบ →</button>
+      <p id="errorMsg" class="error-msg"></p>
     </form>
-    <div style="text-align:center;">
-      <a href="request.html" class="back-link">← กลับไปหน้าแจ้งซ่อมทั่วไป</a>
-    </div>
+    <a href="request.html" class="back-link">← กลับไปหน้าแจ้งซ่อมทั่วไป</a>
   </div>
   <footer class="app-footer">ระบบแจ้งซ่อมอาคารและสถานที่ | พัฒนาโดย Sarawut.C</footer>
 
@@ -85,8 +172,13 @@
       e.preventDefault();
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
+      const errEl = document.getElementById('errorMsg');
       const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if (error) { document.getElementById('errorMsg').textContent = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'; return; }
+      if (error) {
+        errEl.textContent = '⚠️ อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+        errEl.classList.add('show');
+        return;
+      }
       window.location.href = 'dashboard.html';
     });
   </script>
