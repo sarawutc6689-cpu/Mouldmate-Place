@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>อนุมัติงาน | ระบบแจ้งซ่อมอาคารและสถานที่</title>
+<style>
+  * { box-sizing: border-box; margin:0; padding:0; font-family: 'Sarabun', sans-serif; }
+  body { background:#f4f6f8; color:#1e293b; display:flex; min-height:100vh; }
+  .sidebar { width:240px; background:#1e293b; color:#fff; display:flex; flex-direction:column; position:fixed; height:100vh; }
+  .sidebar-header { padding:20px; border-bottom:1px solid #334155; }
+  .sidebar-menu { display:flex; flex-direction:column; padding:10px 0; flex:1; }
+  .sidebar-menu a { padding:12px 20px; color:#cbd5e1; text-decoration:none; font-size:15px; display:block; }
+  .sidebar-menu a:hover, .sidebar-menu a.active { background:#334155; color:#fff; }
+  .content { margin-left:240px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
+  .page-body { flex:1; padding:30px; }
+  .card { background:#fff; border-radius:10px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.08); margin-bottom:20px; }
+  .btn { padding:6px 12px; border:none; border-radius:4px; cursor:pointer; font-size:13px; }
+  .btn-success { background:#16a34a; color:#fff; }
+  .btn-danger { background:#dc2626; color:#fff; }
+  table { width:100%; border-collapse:collapse; margin-top:10px; }
+  th, td { padding:10px; border-bottom:1px solid #e2e8f0; text-align:left; font-size:14px; }
+  th { background:#f1f5f9; }
+  .app-footer { text-align:center; padding:15px; font-size:13px; color:#94a3b8; border-top:1px solid #e2e8f0; background:#fff; }
+</style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header"><h2>🛠️ ระบบแจ้งซ่อม</h2></div>
+    <nav class="sidebar-menu">
+      <a href="request.html">📋 แจ้งซ่อม / ติดตาม</a>
+      <a href="dashboard.html">📊 Dashboard</a>
+      <a href="approve.html" class="active">✅ อนุมัติงาน</a>
+      <a href="reports.html">📈 รายงาน</a>
+      <a href="#" onclick="logout()">🚪 ออกจากระบบ</a>
+    </nav>
+  </aside>
+  <div class="content">
+    <div class="page-body">
+      <h1>รายการรออนุมัติ</h1>
+      <div class="card" style="margin-top:20px;">
+        <table>
+          <thead><tr><th>เลขที่เอกสาร</th><th>ผู้แจ้ง</th><th>แผนก</th><th>สถานที่</th><th>รายละเอียด</th><th>วันที่แจ้ง</th><th>จัดการ</th></tr></thead>
+          <tbody id="pendingList"></tbody>
+        </table>
+      </div>
+    </div>
+    <footer class="app-footer">ระบบแจ้งซ่อมอาคารและสถานที่ | พัฒนาโดย Sarawut.C</footer>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://fuarmmweqxxhczavkvqp.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1YXJtbXdlcXh4aGN6YXZrdnFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMjgzMTcsImV4cCI6MjEwMzgwNDMxN30.n7s4gKOkCvaOSpFSf9FGmWsqi7eAzFe28c_oJWy8NSE";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let sessionUser = null;
+    async function checkAuth() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) { window.location.href = 'login.html'; return; }
+      sessionUser = session;
+      loadPending();
+    }
+    checkAuth();
+
+    async function logout() { await supabaseClient.auth.signOut(); window.location.href = 'login.html'; }
+
+    async function loadPending() {
+      const { data } = await supabaseClient.from('repair_requests')
+        .select(`id, document_no, reporter_name, reporter_section, description, created_at, repair_locations ( building, floor, room )`)
+        .eq('status', 'pending').order('created_at', { ascending: true });
+
+      const tbody = document.getElementById('pendingList');
+      tbody.innerHTML = '';
+      if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#94a3b8;">ไม่มีรายการรออนุมัติ</td></tr>'; return; }
+
+      data.forEach(i => {
+        const loc = i.repair_locations ? `${i.repair_locations.building} ชั้น ${i.repair_locations.floor} ห้อง ${i.repair_locations.room}` : '-';
+        tbody.innerHTML += `<tr>
+          <td>${i.document_no}</td><td>${i.reporter_name}</td><td>${i.reporter_section}</td><td>${loc}</td><td>${i.description}</td><td>${new Date(i.created_at).toLocaleString('th-TH')}</td>
+          <td>
+            <button class="btn btn-success" onclick="updateStatus('${i.id}', 'approved')">อนุมัติ</button>
+            <button class="btn btn-danger" onclick="updateStatus('${i.id}', 'rejected')">ปฏิเสธ</button>
+          </td></tr>`;
+      });
+    }
+
+    async function updateStatus(id, status) {
+      let updateData = { status: status, approved_by: sessionUser.user.id, approved_at: new Date().toISOString() };
+      if(status === 'rejected') {
+        const reason = prompt('ระบุเหตุผลที่ปฏิเสธ:');
+        if(reason === null) return;
+        updateData.reject_reason = reason;
+      }
+      const { error } = await supabaseClient.from('repair_requests').update(updateData).eq('id', id);
+      if(error) { alert('Error: ' + error.message); return; }
+      loadPending();
+    }
+  </script>
+</body>
+</html>
