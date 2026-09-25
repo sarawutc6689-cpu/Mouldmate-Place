@@ -4,158 +4,228 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>แจ้งซ่อม | ระบบแจ้งซ่อมอาคารและสถานที่</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin:0; padding:0; font-family: 'Sarabun', 'Segoe UI', sans-serif; }
-  body { background:#f0f9ff; color:#1e293b; display:flex; min-height:100vh; }
+/* ===== Shared CSS (paste จากด้านบน) ===== */
+* { box-sizing: border-box; margin:0; padding:0; font-family: 'Inter', 'IBM Plex Sans Thai', sans-serif; }
+body {
+  background:
+    radial-gradient(circle at 10% 0%, rgba(139,92,246,.08), transparent 40%),
+    radial-gradient(circle at 100% 100%, rgba(236,72,153,.06), transparent 40%),
+    linear-gradient(135deg, #f5f7ff 0%, #eef2ff 100%);
+  background-attachment: fixed;
+  color:#1e1b4b; display:flex; min-height:100vh;
+}
+.sidebar {
+  width:260px;
+  background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
+  color:#fff; display:flex; flex-direction:column;
+  position:fixed; height:100vh;
+  box-shadow: 4px 0 24px rgba(30,27,75,.15);
+  z-index:100;
+}
+.sidebar-header { padding:26px 22px 22px; border-bottom:1px solid rgba(255,255,255,.08); }
+.sidebar-header h2 {
+  font-size:16px; font-weight:700; letter-spacing:.3px;
+  display:flex; align-items:center; gap:10px;
+  background:linear-gradient(135deg,#a78bfa,#f472b6);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.sidebar-header .logo-icon {
+  width:36px; height:36px; border-radius:10px;
+  background:linear-gradient(135deg,#6366f1,#ec4899);
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px; flex-shrink:0;
+  -webkit-text-fill-color: initial;
+  box-shadow:0 6px 16px rgba(99,102,241,.4);
+}
+.sidebar-menu { display:flex; flex-direction:column; padding:14px 12px; flex:1; gap:4px; }
+.sidebar-menu a {
+  padding:12px 16px; color:#c7d2fe;
+  text-decoration:none; font-size:14px; font-weight:500;
+  display:flex; align-items:center; gap:12px;
+  border-radius:12px;
+  transition: all .25s cubic-bezier(.4,0,.2,1);
+  position:relative;
+}
+.sidebar-menu a .emoji { font-size:16px; }
+.sidebar-menu a:hover { background: rgba(255,255,255,.08); color:#fff; transform: translateX(3px); }
+.sidebar-menu a.active {
+  background: linear-gradient(135deg, rgba(99,102,241,.9), rgba(139,92,246,.9));
+  color:#fff; font-weight:600;
+  box-shadow: 0 8px 20px rgba(99,102,241,.4);
+}
+.sidebar-menu a.active::before {
+  content:''; position:absolute; left:-12px; top:50%; transform:translateY(-50%);
+  width:4px; height:24px; border-radius:0 4px 4px 0;
+  background:linear-gradient(180deg,#a78bfa,#f472b6);
+}
 
-  .sidebar {
-    width:240px;
-    background:linear-gradient(180deg, #0f766e 0%, #115e59 100%);
-    color:#fff; display:flex; flex-direction:column;
-    position:fixed; height:100vh;
-    box-shadow:2px 0 12px rgba(0,0,0,.08);
-  }
-  .sidebar-header { padding:22px 20px; border-bottom:1px solid rgba(255,255,255,.15); }
-  .sidebar-header h2 { font-size:17px; font-weight:700; letter-spacing:.3px; }
-  .sidebar-menu { display:flex; flex-direction:column; padding:12px 0; flex:1; }
-  .sidebar-menu a {
-    padding:12px 20px; color:#ccfbf1; text-decoration:none;
-    font-size:14.5px; display:block; margin:2px 10px; border-radius:8px;
-    transition:all .2s ease;
-  }
-  .sidebar-menu a:hover { background:rgba(255,255,255,.12); color:#fff; transform:translateX(2px); }
-  .sidebar-menu a.active { background:#14b8a6; color:#fff; font-weight:600; box-shadow:0 4px 10px rgba(20,184,166,.35); }
+.content { margin-left:260px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
+.page-body { flex:1; padding:36px 40px; max-width:1400px; width:100%; }
+h1 {
+  font-size:26px; font-weight:800; letter-spacing:-.4px; margin-bottom:6px;
+  background: linear-gradient(135deg,#1e1b4b,#4f46e5 60%, #ec4899);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.page-subtitle { color:#64748b; font-size:14px; margin-bottom:26px; }
 
-  .content { margin-left:240px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
-  .page-body { flex:1; padding:30px; }
-  h1 { font-size:24px; color:#0f766e; font-weight:700; }
+.card {
+  background:#fff; border-radius:20px; padding:26px 28px;
+  box-shadow: 0 4px 24px rgba(99,102,241,.08), 0 1px 3px rgba(0,0,0,.03);
+  border:1px solid rgba(226,232,240,.6);
+  margin-bottom:22px;
+  transition: all .3s cubic-bezier(.4,0,.2,1);
+}
+.card:hover { box-shadow: 0 8px 32px rgba(99,102,241,.12); }
+.card-title {
+  font-size:16px; font-weight:700; color:#1e1b4b; margin-bottom:16px;
+  display:flex; align-items:center; gap:10px;
+}
+.card-title::before {
+  content:''; width:4px; height:20px; border-radius:3px;
+  background:linear-gradient(180deg,#6366f1,#ec4899);
+}
 
-  .card {
-    background:#fff; border-radius:14px; padding:22px;
-    box-shadow:0 4px 16px rgba(15,118,110,.06);
-    border:1px solid #e0f2f1; margin-bottom:20px; max-width:700px;
-  }
-  .form-group { margin-bottom:16px; }
-  .form-group label { display:block; margin-bottom:6px; font-weight:600; font-size:14px; color:#334155; }
-  .form-group input, .form-group select, .form-group textarea {
-    width:100%; padding:10px 12px; border:1px solid #cbd5e1;
-    border-radius:9px; font-size:14px; background:#f8fafc; transition:all .2s;
-    font-family: inherit;
-  }
-  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-    outline:none; border-color:#14b8a6; background:#fff;
-    box-shadow:0 0 0 3px rgba(20,184,166,.15);
-  }
-  .btn {
-    padding:11px 20px; border:none; border-radius:10px;
-    cursor:pointer; font-size:14px; font-weight:600;
-    transition:all .2s;
-  }
-  .btn-primary {
-    background:linear-gradient(135deg,#14b8a6,#0f766e); color:#fff; width:100%;
-  }
-  .btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(20,184,166,.35); }
+.form-group { margin-bottom:18px; }
+.form-group label { display:block; margin-bottom:8px; font-weight:600; font-size:13.5px; color:#475569; }
+.form-group input, .form-group select, .form-group textarea {
+  width:100%; padding:12px 15px;
+  border:1.5px solid #e2e8f0; border-radius:12px;
+  font-size:14.5px; background:#f8fafc; color:#1e1b4b;
+  transition: all .25s cubic-bezier(.4,0,.2,1);
+  font-family: inherit;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  outline:none; border-color:#6366f1; background:#fff;
+  box-shadow: 0 0 0 4px rgba(99,102,241,.12);
+}
+.form-group input[readonly] { background:#f1f5f9; color:#64748b; cursor:not-allowed; }
 
-  table { width:100%; border-collapse:collapse; margin-top:12px; }
-  th, td { padding:12px 10px; border-bottom:1px solid #e0f2f1; text-align:left; font-size:14px; }
-  th { background:#ccfbf1; color:#0f766e; font-weight:700; font-size:13px; }
-  tr:hover td { background:#f0fdfa; }
+.btn {
+  padding:10px 20px; border:none; border-radius:12px;
+  cursor:pointer; font-size:13.5px; font-weight:600;
+  transition: all .25s cubic-bezier(.4,0,.2,1);
+  font-family: inherit;
+  display: inline-flex; align-items:center; gap:6px;
+  justify-content:center;
+}
+.btn-primary {
+  background: linear-gradient(135deg,#6366f1,#8b5cf6);
+  color:#fff; box-shadow: 0 6px 16px rgba(99,102,241,.35);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(99,102,241,.45); }
+.btn-full { width: 100%; }
 
-  .badge { padding:5px 12px; border-radius:20px; font-size:12px; font-weight:700; display:inline-block; }
-  .badge-pending    { background:#fef3c7; color:#92400e; }
-  .badge-approved   { background:#dbeafe; color:#1e40af; }
-  .badge-in_progress{ background:#e0e7ff; color:#4338ca; }
-  .badge-completed  { background:#d1fae5; color:#065f46; }
-  .badge-rejected   { background:#fee2e2; color:#991b1b; }
+.app-footer {
+  text-align:center; padding:20px;
+  font-size:12.5px; color:#94a3b8;
+  border-top:1px solid rgba(226,232,240,.6);
+  background: rgba(255,255,255,.6);
+  backdrop-filter: blur(10px);
+}
 
-  .app-footer {
-    text-align:center; padding:16px; font-size:13px;
-    color:#64748b; border-top:1px solid #e0f2f1; background:#fff;
-  }
+/* ===== Page specific ===== */
+.form-card { max-width: 760px; }
+.result-box {
+  max-width: 760px;
+  background: linear-gradient(135deg,#ecfdf5,#d1fae5);
+  border: 1.5px solid #6ee7b7;
+  border-radius:20px;
+  padding:26px 28px;
+  display:none;
+  animation: slideIn .5s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 8px 28px rgba(16,185,129,.15);
+}
+@keyframes slideIn {
+  from { opacity:0; transform: translateY(-10px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.result-box h3 {
+  color:#065f46; margin-bottom:14px; font-size:17px;
+  display:flex; align-items:center; gap:8px;
+}
+.result-box .doc-no {
+  font-size:24px; font-weight:800; color:#047857;
+  background:#fff; padding:12px 20px; border-radius:14px;
+  display:inline-block; margin:8px 0;
+  letter-spacing:.6px;
+  border:2px dashed #34d399;
+  box-shadow: 0 4px 12px rgba(16,185,129,.15);
+}
+.result-box .hint {
+  margin-top:16px; font-size:13.5px; color:#065f46;
+}
+.result-box .hint a { color:#4f46e5; font-weight:700; text-decoration:none; }
+.result-box .hint a:hover { text-decoration: underline; }
 
-  .tabs { display:flex; gap:10px; margin-bottom:20px; }
-  .tab-btn {
-    padding:9px 18px; border:none; background:#e0f2f1; color:#0f766e;
-    border-radius:9px; cursor:pointer; font-weight:600; font-size:14px;
-    transition:all .2s;
-  }
-  .tab-btn:hover { background:#ccfbf1; }
-  .tab-btn.active {
-    background:linear-gradient(135deg,#14b8a6,#0f766e); color:#fff;
-    box-shadow:0 4px 12px rgba(20,184,166,.3);
-  }
-  .tab-content { display:none; }
-  .tab-content.active { display:block; }
+.emp-status { font-weight:600; font-size:12.5px; margin-top:6px; display:block; }
+
+@media (max-width: 900px) {
+  .sidebar { width:70px; }
+  .sidebar-header h2 span, .sidebar-menu a span.text { display:none; }
+  .sidebar-menu a { justify-content:center; padding:14px 0; }
+  .content { margin-left:70px; }
+  .page-body { padding:24px 20px; }
+}
 </style>
 </head>
 <body>
 
   <aside class="sidebar">
-    <div class="sidebar-header"><h2>🛠️ ระบบแจ้งซ่อม</h2></div>
+    <div class="sidebar-header">
+      <h2><span class="logo-icon">🛠️</span><span>ระบบแจ้งซ่อม</span></h2>
+    </div>
     <nav class="sidebar-menu">
-      <a href="request.html" class="active">📋 แจ้งซ่อม / ติดตาม</a>
-      <a href="dashboard.html">📊 Dashboard</a>
-      <a href="approve.html">✅ อนุมัติงาน</a>
-      <a href="reports.html">📈 รายงาน</a>
-      <a href="locations.html">🏢 จัดการสถานที่</a>
-      <a href="login.html">🔑 เข้าสู่ระบบ</a>
+      <a href="request.html" class="active"><span class="emoji">📋</span><span class="text">แจ้งซ่อม</span></a>
+      <a href="track.html"><span class="emoji">🔍</span><span class="text">ติดตามสถานะ</span></a>
+      <a href="dashboard.html"><span class="emoji">📊</span><span class="text">Dashboard</span></a>
+      <a href="approve.html"><span class="emoji">✅</span><span class="text">อนุมัติงาน</span></a>
+      <a href="reports.html"><span class="emoji">📈</span><span class="text">รายงาน</span></a>
+      <a href="locations.html"><span class="emoji">🏢</span><span class="text">จัดการสถานที่</span></a>
+      <a href="login.html"><span class="emoji">🔑</span><span class="text">เข้าสู่ระบบ</span></a>
     </nav>
   </aside>
 
   <div class="content">
     <div class="page-body">
       <h1>แจ้งซ่อมอาคารและสถานที่</h1>
-      <p style="margin-bottom:20px;color:#64748b;">ระบบแจ้งซ่อมและตรวจสอบสถานะการดำเนินงาน</p>
+      <p class="page-subtitle">กรอกข้อมูลเพื่อแจ้งซ่อม — ระบบจะออกเลขที่เอกสารให้อัตโนมัติ</p>
 
-      <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('req')">📋 แจ้งซ่อมใหม่</button>
-        <button class="tab-btn" onclick="switchTab('trk')">🔍 ติดตามสถานะงาน</button>
-      </div>
-
-      <!-- Tab แจ้งซ่อม -->
-      <div id="tab-req" class="tab-content active">
-        <div class="card">
-          <form id="requestForm">
-            <div class="form-group">
-              <label>รหัสพนักงาน</label>
-              <input type="text" id="empCode" placeholder="กรอกรหัสพนักงานแล้วคลิกออกนอกช่อง" required>
-              <small id="empStatus" style="font-weight:600;"></small>
-            </div>
-            <div class="form-group"><label>ชื่อ-นามสกุล</label><input type="text" id="empName" readonly style="background:#f1f5f9; color:#64748b;"></div>
-            <div class="form-group"><label>แผนก/ส่วนงาน</label><input type="text" id="empSection" readonly style="background:#f1f5f9; color:#64748b;"></div>
-            <div class="form-group">
-              <label>สถานที่แจ้งซ่อม</label>
-              <select id="locationSelect" required><option value="">-- เลือกสถานที่ --</option></select>
-            </div>
-            <div class="form-group">
-              <label>รายละเอียดปัญหา</label>
-              <textarea id="description" rows="4" placeholder="อธิบายอาการหรือปัญหาที่พบ" required></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary" id="submitBtn">📤 ส่งแจ้งซ่อม</button>
-          </form>
-        </div>
-        <div class="card" id="resultBox" style="display:none; background:#f0fdf4; border:1px solid #86efac; max-width:700px;">
-          <h3 style="color:#166534; margin-bottom:8px;">✅ แจ้งซ่อมสำเร็จ</h3>
-          <p>เลขที่เอกสารของคุณคือ: <strong id="resultDocNo" style="font-size:18px; color:#15803d;"></strong></p>
-        </div>
-      </div>
-
-      <!-- Tab ติดตามสถานะ -->
-      <div id="tab-trk" class="tab-content">
-        <div class="card">
-          <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
-            <div class="form-group" style="flex:1; margin-bottom:0;"><label>เลขที่เอกสาร</label><input type="text" id="trackDocNo" placeholder="PL-YYMMDD-XXXX"></div>
-            <div class="form-group" style="flex:1; margin-bottom:0;"><label>รหัสพนักงาน</label><input type="text" id="trackEmpCode" placeholder="รหัสพนักงาน"></div>
+      <div class="card form-card">
+        <div class="card-title">แบบฟอร์มแจ้งซ่อม</div>
+        <form id="requestForm">
+          <div class="form-group">
+            <label>รหัสพนักงาน</label>
+            <input type="text" id="empCode" placeholder="กรอกรหัสพนักงานแล้วคลิกออกนอกช่อง" required>
+            <small id="empStatus" class="emp-status"></small>
           </div>
-          <button class="btn btn-primary" onclick="trackRepair()" style="width:auto;">🔍 ค้นหาข้อมูล</button>
-        </div>
-        <div class="card" style="max-width:100%;">
-          <h3 style="color:#0f766e; font-size:16px;">ผลการค้นหา</h3>
-          <table>
-            <thead><tr><th>เลขที่เอกสาร</th><th>รายละเอียด</th><th>สถานะ</th><th>วันที่แจ้ง</th></tr></thead>
-            <tbody id="trackResultList"><tr><td colspan="4" style="text-align:center; color:#94a3b8;">กรุณากรอกข้อมูลเพื่อค้นหา</td></tr></tbody>
-          </table>
-        </div>
+          <div class="form-group"><label>ชื่อ-นามสกุล</label><input type="text" id="empName" readonly></div>
+          <div class="form-group"><label>แผนก/ส่วนงาน</label><input type="text" id="empSection" readonly></div>
+          <div class="form-group">
+            <label>สถานที่แจ้งซ่อม</label>
+            <select id="locationSelect" required><option value="">-- เลือกสถานที่ --</option></select>
+          </div>
+          <div class="form-group">
+            <label>รายละเอียดปัญหา</label>
+            <textarea id="description" rows="4" placeholder="อธิบายอาการหรือปัญหาที่พบ" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">📤 ส่งแจ้งซ่อม</button>
+        </form>
+      </div>
+
+      <div class="result-box" id="resultBox">
+        <h3>✅ แจ้งซ่อมสำเร็จ</h3>
+        <p style="color:#065f46; font-size:14px;">เลขที่เอกสารของคุณคือ:</p>
+        <div class="doc-no" id="resultDocNo"></div>
+        <p class="hint">
+          💡 กรุณาจดจำเลขที่เอกสารไว้เพื่อติดตามสถานะที่หน้า
+          <a href="track.html">🔍 ติดตามสถานะ</a>
+        </p>
       </div>
     </div>
     <footer class="app-footer">ระบบแจ้งซ่อมอาคารและสถานที่ | พัฒนาโดย Sarawut.C</footer>
@@ -166,13 +236,6 @@
     const SUPABASE_URL = "https://fuarmmweqxxhczavkvqp.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1YXJtbXdlcXh4aGN6YXZrdnFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMjgzMTcsImV4cCI6MjEwMzgwNDMxN30.n7s4gKOkCvaOSpFSf9FGmWsqi7eAzFe28c_oJWy8NSE";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    function switchTab(t) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      if(t==='req') { document.querySelectorAll('.tab-btn')[0].classList.add('active'); document.getElementById('tab-req').classList.add('active'); }
-      else { document.querySelectorAll('.tab-btn')[1].classList.add('active'); document.getElementById('tab-trk').classList.add('active'); }
-    }
 
     async function loadLocations() {
       const { data } = await supabaseClient.from('repair_locations').select('id, building, floor, room').order('building');
@@ -188,11 +251,17 @@
       if (!code) return;
       const { data } = await supabaseClient.from('employees').select('emp_code, name, section').eq('emp_code', code).maybeSingle();
       if (!data) {
-        foundEmp = null; document.getElementById('empName').value = ''; document.getElementById('empSection').value = '';
-        statusEl.textContent = '❌ ไม่พบรหัสพนักงาน'; statusEl.style.color = '#dc2626';
+        foundEmp = null;
+        document.getElementById('empName').value = '';
+        document.getElementById('empSection').value = '';
+        statusEl.textContent = '❌ ไม่พบรหัสพนักงาน';
+        statusEl.style.color = '#dc2626';
       } else {
-        foundEmp = data; document.getElementById('empName').value = data.name; document.getElementById('empSection').value = data.section;
-        statusEl.textContent = '✅ พบข้อมูล'; statusEl.style.color = '#16a34a';
+        foundEmp = data;
+        document.getElementById('empName').value = data.name;
+        document.getElementById('empSection').value = data.section;
+        statusEl.textContent = '✅ พบข้อมูล';
+        statusEl.style.color = '#10b981';
       }
     });
 
@@ -200,27 +269,18 @@
       e.preventDefault();
       if (!foundEmp) { alert('กรุณากรอกรหัสพนักงานให้ถูกต้อง'); return; }
       const { data, error } = await supabaseClient.rpc('submit_repair_request', {
-        p_emp_code: foundEmp.emp_code, p_location_id: document.getElementById('locationSelect').value, p_description: document.getElementById('description').value
+        p_emp_code: foundEmp.emp_code,
+        p_location_id: document.getElementById('locationSelect').value,
+        p_description: document.getElementById('description').value
       });
       if (error) { alert('Error: ' + error.message); return; }
       document.getElementById('requestForm').reset();
       document.getElementById('empStatus').textContent = '';
       document.getElementById('resultDocNo').textContent = data.document_no;
       document.getElementById('resultBox').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       foundEmp = null;
     });
-
-    async function trackRepair() {
-      const doc = document.getElementById('trackDocNo').value.trim();
-      const emp = document.getElementById('trackEmpCode').value.trim();
-      const tbody = document.getElementById('trackResultList');
-      const { data } = await supabaseClient.rpc('track_repair_request', { p_document_no: doc, p_emp_code: emp });
-      tbody.innerHTML = '';
-      if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#dc2626;">ไม่พบข้อมูล</td></tr>'; return; }
-      data.forEach(i => {
-        tbody.innerHTML += `<tr><td><strong>${i.document_no}</strong></td><td>${i.description}</td><td><span class="badge badge-${i.status}">${i.status}</span></td><td>${new Date(i.created_at).toLocaleString('th-TH')}</td></tr>`;
-      });
-    }
   </script>
 </body>
 </html>
