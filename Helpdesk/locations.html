@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>จัดการสถานที่ | ระบบแจ้งซ่อมอาคารและสถานที่</title>
+<style>
+  * { box-sizing: border-box; margin:0; padding:0; font-family: 'Sarabun', sans-serif; }
+  body { background:#f4f6f8; color:#1e293b; display:flex; min-height:100vh; }
+  
+  .sidebar { width:240px; background:#1e293b; color:#fff; display:flex; flex-direction:column; position:fixed; height:100vh; }
+  .sidebar-header { padding:20px; border-bottom:1px solid #334155; }
+  .sidebar-menu { display:flex; flex-direction:column; padding:10px 0; flex:1; }
+  .sidebar-menu a { padding:12px 20px; color:#cbd5e1; text-decoration:none; font-size:15px; display:block; }
+  .sidebar-menu a:hover, .sidebar-menu a.active { background:#334155; color:#fff; }
+  
+  .content { margin-left:240px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
+  .page-body { flex:1; padding:30px; }
+  
+  .card { background:#fff; border-radius:10px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.08); margin-bottom:20px; }
+  .form-group { margin-bottom:14px; }
+  .form-group label { display:block; margin-bottom:4px; font-weight:600; font-size:13px; }
+  .form-group input { width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; }
+  
+  .btn { padding:8px 16px; border:none; border-radius:6px; cursor:pointer; font-size:14px; }
+  .btn-primary { background:#2563eb; color:#fff; }
+  .btn-warning { background:#d97706; color:#fff; }
+  .btn-danger { background:#dc2626; color:#fff; }
+  .btn-secondary { background:#64748b; color:#fff; }
+
+  table { width:100%; border-collapse:collapse; margin-top:10px; }
+  th, td { padding:10px; border-bottom:1px solid #e2e8f0; text-align:left; font-size:14px; }
+  th { background:#f1f5f9; }
+
+  .app-footer { text-align:center; padding:15px; font-size:13px; color:#94a3b8; border-top:1px solid #e2e8f0; background:#fff; }
+</style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-header"><h2>🛠️ ระบบแจ้งซ่อม</h2></div>
+    <nav class="sidebar-menu">
+      <a href="request.html">📋 แจ้งซ่อม / ติดตาม</a>
+      <a href="dashboard.html">📊 Dashboard</a>
+      <a href="approve.html">✅ อนุมัติงาน</a>
+      <a href="reports.html">📈 รายงาน</a>
+      <a href="locations.html" class="active">🏢 จัดการสถานที่</a>
+      <a href="#" onclick="logout()">🚪 ออกจากระบบ</a>
+    </nav>
+  </aside>
+
+  <div class="content">
+    <div class="page-body">
+      <h1>จัดการข้อมูลสถานที่ (อาคาร / ชั้น / ห้อง)</h1>
+      <p style="color:#64748b; margin-bottom:20px; font-size:14px;">เพิ่ม แก้ไข หรือลบสถานที่สำหรับใช้ในฟอร์มแจ้งซ่อม</p>
+
+      <div class="card" style="max-width:500px;">
+        <h3 id="formTitle" style="margin-bottom:15px;">➕ เพิ่มสถานที่ใหม่</h3>
+        <form id="locationForm">
+          <input type="hidden" id="locId">
+          <div class="form-group">
+            <label>ชื่ออาคาร</label>
+            <input type="text" id="building" placeholder="เช่น อาคาร A" required>
+          </div>
+          <div class="form-group">
+            <label>ชั้น</label>
+            <input type="text" id="floor" placeholder="เช่น 1 หรือ ชั้นลอย" required>
+          </div>
+          <div class="form-group">
+            <label>ห้อง / พื้นที่</label>
+            <input type="text" id="room" placeholder="เช่น ห้องประชุมใหญ่" required>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button type="submit" class="btn btn-primary" id="saveBtn">บันทึกข้อมูล</button>
+            <button type="button" class="btn btn-secondary" id="cancelBtn" style="display:none;" onclick="resetForm()">ยกเลิก</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>รายการสถานที่ทั้งหมด</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>อาคาร</th>
+              <th>ชั้น</th>
+              <th>ห้อง / พื้นที่</th>
+              <th style="width:150px;">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="locationList">
+            <tr><td colspan="4" style="text-align:center; color:#94a3b8;">กำลังโหลดข้อมูล...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <footer class="app-footer">
+      ระบบแจ้งซ่อมอาคารและสถานที่ | พัฒนาโดย Sarawut.C
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://fuarmmweqxxhczavkvqp.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1YXJtbXdlcXh4aGN6YXZrdnFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMjgzMTcsImV4cCI6MjEwMzgwNDMxN30.n7s4gKOkCvaOSpFSf9FGmWsqi7eAzFe28c_oJWy8NSE";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // ตรวจสอบสิทธิ์การเข้าสู่ระบบ
+    async function checkAuth() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) {
+        window.location.href = 'login.html';
+        return;
+      }
+      loadLocations();
+    }
+    checkAuth();
+
+    async function logout() {
+      await supabaseClient.auth.signOut();
+      window.location.href = 'login.html';
+    }
+
+    // โหลดข้อมูลสถานที่ทั้งหมด
+    async function loadLocations() {
+      const { data, error } = await supabaseClient
+        .from('repair_locations')
+        .select('*')
+        .order('building', { ascending: true });
+
+      const tbody = document.getElementById('locationList');
+      tbody.innerHTML = '';
+
+      if (error || !data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">ยังไม่มีข้อมูลสถานที่</td></tr>';
+        return;
+      }
+
+      data.forEach(loc => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${loc.building}</td>
+            <td>${loc.floor}</td>
+            <td>${loc.room}</td>
+            <td>
+              <button class="btn btn-warning" style="padding:4px 8px; font-size:12px;" onclick="editLocation('${loc.id}', '${loc.building}', '${loc.floor}', '${loc.room}')">แก้ไข</button>
+              <button class="btn btn-danger" style="padding:4px 8px; font-size:12px;" onclick="deleteLocation('${loc.id}')">ลบ</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    // บันทึกข้อมูล (เพิ่มใหม่ หรือ อัปเดต)
+    document.getElementById('locationForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('locId').value;
+      const building = document.getElementById('building').value.trim();
+      const floor = document.getElementById('floor').value.trim();
+      const room = document.getElementById('room').value.trim();
+
+      if (id) {
+        // อัปเดตข้อมูลเดิม
+        const { error } = await supabaseClient
+          .from('repair_locations')
+          .update({ building, floor, room })
+          .eq('id', id);
+
+        if (error) { alert('เกิดข้อผิดพลาด: ' + error.message); return; }
+        alert('อัปเดตข้อมูลสำเร็จ');
+      } else {
+        // เพิ่มข้อมูลใหม่
+        const { error } = await supabaseClient
+          .from('repair_locations')
+          .insert([{ building, floor, room }]);
+
+        if (error) { alert('เกิดข้อผิดพลาด: ' + error.message); return; }
+        alert('เพิ่มสถานที่สำเร็จ');
+      }
+
+      resetForm();
+      loadLocations();
+    });
+
+    // นำข้อมูลใส่ฟอร์มเพื่อแก้ไข
+    function editLocation(id, building, floor, room) {
+      document.getElementById('locId').value = id;
+      document.getElementById('building').value = building;
+      document.getElementById('floor').value = floor;
+      document.getElementById('room').value = room;
+      document.getElementById('formTitle').textContent = '✏️ แก้ไขข้อมูลสถานที่';
+      document.getElementById('saveBtn').textContent = 'อัปเดต';
+      document.getElementById('cancelBtn').style.display = 'inline-block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ลบสถานที่
+    async function deleteLocation(id) {
+      if (!confirm('คุณต้องการลบสถานที่นี้ใช่หรือไม่?')) return;
+
+      const { error } = await supabaseClient
+        .from('repair_locations')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        alert('ไม่สามารถลบได้ เนื่องจากอาจมีประวัติการแจ้งซ่อมผูกอยู่กับสถานที่นี้');
+        return;
+      }
+      loadLocations();
+    }
+
+    // ล้างฟอร์มกลับเป็นโหมดเพิ่มใหม่
+    function resetForm() {
+      document.getElementById('locationForm').reset();
+      document.getElementById('locId').value = '';
+      document.getElementById('formTitle').textContent = '➕ เพิ่มสถานที่ใหม่';
+      document.getElementById('saveBtn').textContent = 'บันทึกข้อมูล';
+      document.getElementById('cancelBtn').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
