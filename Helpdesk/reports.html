@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>รายงาน | ระบบแจ้งซ่อมอาคารและสถานที่</title>
+<style>
+  * { box-sizing: border-box; margin:0; padding:0; font-family: 'Sarabun', sans-serif; }
+  body { background:#f4f6f8; color:#1e293b; display:flex; min-height:100vh; }
+  .sidebar { width:240px; background:#1e293b; color:#fff; display:flex; flex-direction:column; position:fixed; height:100vh; }
+  .sidebar-header { padding:20px; border-bottom:1px solid #334155; }
+  .sidebar-menu { display:flex; flex-direction:column; padding:10px 0; flex:1; }
+  .sidebar-menu a { padding:12px 20px; color:#cbd5e1; text-decoration:none; font-size:15px; display:block; }
+  .sidebar-menu a:hover, .sidebar-menu a.active { background:#334155; color:#fff; }
+  .content { margin-left:240px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
+  .page-body { flex:1; padding:30px; }
+  .card { background:#fff; border-radius:10px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.08); margin-bottom:20px; }
+  .form-group { margin-bottom:0; }
+  .form-group label { display:block; margin-bottom:4px; font-weight:600; font-size:13px; }
+  .form-group input, .form-group select { width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; }
+  .btn { padding:8px 16px; border:none; border-radius:6px; cursor:pointer; font-size:14px; }
+  .btn-primary { background:#2563eb; color:#fff; }
+  table { width:100%; border-collapse:collapse; margin-top:10px; }
+  th, td { padding:10px; border-bottom:1px solid #e2e8f0; text-align:left; font-size:14px; }
+  th { background:#f1f5f9; }
+  .badge { padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600; display:inline-block; }
+  .badge-pending { background:#fef9c3; color:#854d0e; }
+  .badge-approved { background:#dbeafe; color:#1e40af; }
+  .badge-in_progress { background:#e0e7ff; color:#4338ca; }
+  .badge-completed { background:#dcfce7; color:#166534; }
+  .badge-rejected { background:#fee2e2; color:#991b1b; }
+  .app-footer { text-align:center; padding:15px; font-size:13px; color:#94a3b8; border-top:1px solid #e2e8f0; background:#fff; }
+</style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-header"><h2>🛠️ ระบบแจ้งซ่อม</h2></div>
+    <nav class="sidebar-menu">
+      <a href="request.html">📋 แจ้งซ่อม / ติดตาม</a>
+      <a href="dashboard.html">📊 Dashboard</a>
+      <a href="approve.html">✅ อนุมัติงาน</a>
+      <a href="reports.html" class="active">📈 รายงาน</a>
+      <a href="#" onclick="logout()">🚪 ออกจากระบบ</a>
+    </nav>
+  </aside>
+  <div class="content">
+    <div class="page-body">
+      <h1>รายงานการแจ้งซ่อม</h1>
+      <div class="card" style="margin-top:20px;">
+        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-bottom:15px;">
+          <div class="form-group" style="flex:1; min-width:140px;">
+            <label>สถานะ</label>
+            <select id="filterStatus">
+              <option value="">ทั้งหมด</option>
+              <option value="pending">รอดำเนินการ</option>
+              <option value="approved">อนุมัติแล้ว</option>
+              <option value="in_progress">กำลังซ่อม</option>
+              <option value="completed">เสร็จสิ้น</option>
+              <option value="rejected">ปฏิเสธ</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex:1; min-width:140px;"><label>จากวันที่</label><input type="date" id="filterFrom"></div>
+          <div class="form-group" style="flex:1; min-width:140px;"><label>ถึงวันที่</label><input type="date" id="filterTo"></div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-primary" onclick="loadReports()">ค้นหา</button>
+            <button class="btn" style="background:#e2e8f0;" onclick="exportCSV()">Export CSV</button>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>เลขที่เอกสาร</th><th>ผู้แจ้ง</th><th>แผนก</th><th>สถานที่</th><th>รายละเอียด</th><th>สถานะ</th><th>วันที่แจ้ง</th></tr></thead>
+          <tbody id="reportList"></tbody>
+        </table>
+      </div>
+    </div>
+    <footer class="app-footer">ระบบแจ้งซ่อมอาคารและสถานที่ | พัฒนาโดย Sarawut.C</footer>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://fuarmmweqxxhczavkvqp.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1YXJtbXdlcXh4aGN6YXZrdnFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMjgzMTcsImV4cCI6MjEwMzgwNDMxN30.n7s4gKOkCvaOSpFSf9FGmWsqi7eAzFe28c_oJWy8NSE";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function checkAuth() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) { window.location.href = 'login.html'; return; }
+      loadReports();
+    }
+    checkAuth();
+
+    async function logout() { await supabaseClient.auth.signOut(); window.location.href = 'login.html'; }
+
+    let cacheData = [];
+    async function loadReports() {
+      let query = supabaseClient.from('repair_requests').select(`document_no, reporter_name, reporter_section, description, status, created_at, repair_locations ( building, floor, room )`).order('created_at', { ascending: false });
+      const st = document.getElementById('filterStatus').value;
+      const from = document.getElementById('filterFrom').value;
+      const to = document.getElementById('filterTo').value;
+      if (st) query = query.eq('status', st);
+      if (from) query = query.gte('created_at', from);
+      if (to) query = query.lte('created_at', to + 'T23:59:59');
+
+      const { data } = await query;
+      cacheData = data || [];
+      const tbody = document.getElementById('reportList');
+      tbody.innerHTML = '';
+      if (cacheData.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#94a3b8;">ไม่พบข้อมูล</td></tr>'; return; }
+
+      cacheData.forEach(i => {
+        const loc = i.repair_locations ? `${i.repair_locations.building} ชั้น ${i.repair_locations.floor} ห้อง ${i.repair_locations.room}` : '-';
+        tbody.innerHTML += `<tr><td>${i.document_no}</td><td>${i.reporter_name}</td><td>${i.reporter_section}</td><td>${loc}</td><td>${i.description}</td><td><span class="badge badge-${i.status}">${i.status}</span></td><td>${new Date(i.created_at).toLocaleString('th-TH')}</td></tr>`;
+      });
+    }
+
+    function exportCSV() {
+      if (cacheData.length === 0) { alert('ไม่มีข้อมูล'); return; }
+      const header = ['เลขที่เอกสาร','ผู้แจ้ง','แผนก','สถานที่','รายละเอียด','สถานะ','วันที่แจ้ง'];
+      const rows = cacheData.map(i => {
+        const loc = i.repair_locations ? `${i.repair_locations.building} ชั้น ${i.repair_locations.floor} ห้อง ${i.repair_locations.room}` : '-';
+        return [i.document_no, i.reporter_name, i.reporter_section, loc, `"${i.description.replace(/"/g,'""')}"`, i.status, new Date(i.created_at).toLocaleString('th-TH')];
+      });
+      const csv = [header, ...rows].map(r => r.join(',')).join('\n');
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
+      link.download = `repair-report-${new Date().toISOString().slice(0,10)}.csv`; link.click();
+    }
+  </script>
+</body>
+</html>
