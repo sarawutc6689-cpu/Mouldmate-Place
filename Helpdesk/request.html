@@ -99,8 +99,18 @@
                             <input type="text" id="emp_code" placeholder="เช่น EMP-00124" class="w-full bg-zinc-900/50 border border-cardBorder rounded-xl px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:border-primaryRed transition-colors">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">ชื่อ-นามสกุล / แผนก</label>
-                            <input type="text" id="emp_info" disabled placeholder="แสดงข้อมูลอัตโนมัติ..." class="w-full bg-zinc-950/40 border border-cardBorder/50 rounded-xl px-4 py-3 text-sm text-zinc-500 cursor-not-allowed">
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">ชื่อ-นามสกุล</label>
+                            <input type="text" id="emp_name" disabled placeholder="แสดงข้อมูลอัตโนมัติ..." class="w-full bg-zinc-950/40 border border-cardBorder/50 rounded-xl px-4 py-3 text-sm text-zinc-500 cursor-not-allowed">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">แผนก (Department)</label>
+                            <input type="text" id="emp_department" disabled placeholder="แสดงข้อมูลอัตโนมัติ..." class="w-full bg-zinc-950/40 border border-cardBorder/50 rounded-xl px-4 py-3 text-sm text-zinc-500 cursor-not-allowed">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">ฝ่าย (Section)</label>
+                            <input type="text" id="emp_section" disabled placeholder="แสดงข้อมูลอัตโนมัติ..." class="w-full bg-zinc-950/40 border border-cardBorder/50 rounded-xl px-4 py-3 text-sm text-zinc-500 cursor-not-allowed">
                         </div>
                     </div>
 
@@ -132,6 +142,20 @@
                         <textarea rows="4" id="description" placeholder="ระบุรายละเอียดหรือจุดที่ต้องการให้ซ่อมแซม..." class="w-full bg-zinc-900/50 border border-cardBorder rounded-xl px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:border-primaryRed transition-colors resize-none"></textarea>
                     </div>
 
+                    <!-- Photo Upload (2 ช่อง, ไม่เกิน 5MB ต่อรูป) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">รูปประกอบ 1 (ไม่เกิน 5MB)</label>
+                            <input type="file" id="image_1" accept="image/*" class="w-full bg-zinc-900/50 border border-cardBorder rounded-xl px-4 py-2.5 text-sm text-zinc-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-primaryRed/20 file:text-primaryRed hover:file:bg-primaryRed/30 focus:outline-none focus:border-primaryRed transition-colors">
+                            <p id="image_1_err" class="hidden text-xs text-red-400 mt-1"></p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">รูปประกอบ 2 (ไม่เกิน 5MB)</label>
+                            <input type="file" id="image_2" accept="image/*" class="w-full bg-zinc-900/50 border border-cardBorder rounded-xl px-4 py-2.5 text-sm text-zinc-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-primaryRed/20 file:text-primaryRed hover:file:bg-primaryRed/30 focus:outline-none focus:border-primaryRed transition-colors">
+                            <p id="image_2_err" class="hidden text-xs text-red-400 mt-1"></p>
+                        </div>
+                    </div>
+
                     <!-- Submit Button -->
                     <button type="button" id="submitBtn" class="w-full bg-primaryRed hover:bg-red-700 text-white font-medium py-3.5 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-red-900/30 active:scale-[0.99] disabled:opacity-50">
                         ยืนยันการส่งเรื่องแจ้งซ่อม
@@ -153,6 +177,10 @@
         const SUPABASE_URL = 'https://fuarmmweqxxhczavkvqp.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1YXJtbXdlcXh4aGN6YXZrdnFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMjgzMTcsImV4cCI6MjEwMzgwNDMxN30.n7s4gKOkCvaOSpFSf9FGmWsqi7eAzFe28c_oJWy8NSE'; // <-- ใส่ anon key จริงตรงนี้
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Edge Function สำหรับอัปโหลดรูปขึ้น Google Drive
+        const UPLOAD_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/upload-to-drive`;
+        const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
 
         const statusBox = document.getElementById('statusBox');
         function showStatus(message, type) {
@@ -252,9 +280,29 @@
             }
         });
 
-        // 4. ตรวจสอบรหัสพนักงานอัตโนมัติเมื่อพิมพ์เสร็จ (emp_code)
+        // 4. ตรวจสอบรหัสพนักงานอัตโนมัติเมื่อพิมพ์เสร็จ (emp_code) -> แยกชื่อ/แผนก/ฝ่าย
         const empInput = document.getElementById('emp_code');
-        const empInfoInput = document.getElementById('emp_info');
+        const empNameInput = document.getElementById('emp_name');
+        const empDeptInput = document.getElementById('emp_department');
+        const empSectionInput = document.getElementById('emp_section');
+
+        function setEmpFieldsError(msg) {
+            [empNameInput, empDeptInput, empSectionInput].forEach(el => {
+                el.value = msg;
+                el.classList.add('text-red-400');
+                el.classList.remove('text-zinc-200');
+            });
+        }
+
+        function setEmpFields(data) {
+            empNameInput.value = data.name || '';
+            empDeptInput.value = data.department || '';
+            empSectionInput.value = data.section || '';
+            [empNameInput, empDeptInput, empSectionInput].forEach(el => {
+                el.classList.remove('text-red-400');
+                el.classList.add('text-zinc-200');
+            });
+        }
 
         empInput.addEventListener('blur', async () => {
             const empCode = empInput.value.trim();
@@ -263,29 +311,77 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('employees')
-                    .select('name, department')
+                    .select('name, department, section')
                     .eq('emp_code', empCode)
                     .single();
 
                 if (error || !data) {
-                    empInfoInput.value = 'ไม่พบข้อมูลพนักงานนี้';
-                    empInfoInput.classList.add('text-red-400');
-                    empInfoInput.classList.remove('text-zinc-200');
+                    setEmpFieldsError('ไม่พบข้อมูลพนักงานนี้');
                 } else {
-                    empInfoInput.value = `${data.name} (${data.department})`;
-                    empInfoInput.classList.remove('text-red-400');
-                    empInfoInput.classList.add('text-zinc-200');
+                    setEmpFields(data);
                 }
             } catch (err) {
                 console.error('Error fetching employee:', err.message);
+                setEmpFieldsError('เกิดข้อผิดพลาดในการค้นหา');
             }
         });
 
-        // 5. ฟังก์ชันส่งเรื่องแจ้งซ่อมผ่าน RPC
+        // 5a. ตรวจสอบขนาดไฟล์รูปทันทีตอนเลือก (ไม่เกิน 5MB)
+        function setupImageValidation(inputId, errId) {
+            const input = document.getElementById(inputId);
+            const errEl = document.getElementById(errId);
+            input.addEventListener('change', () => {
+                errEl.classList.add('hidden');
+                const file = input.files[0];
+                if (!file) return;
+                if (file.size > MAX_IMAGE_BYTES) {
+                    errEl.textContent = `ไฟล์ "${file.name}" ขนาด ${(file.size / 1024 / 1024).toFixed(1)}MB เกิน 5MB กรุณาเลือกไฟล์อื่น`;
+                    errEl.classList.remove('hidden');
+                    input.value = '';
+                }
+            });
+        }
+        setupImageValidation('image_1', 'image_1_err');
+        setupImageValidation('image_2', 'image_2_err');
+
+        // 5b. แปลงไฟล์เป็น base64 (ตัด prefix data:...;base64, ออก)
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // 5c. อัปโหลดไฟล์ 1 รูปไปยัง Edge Function -> คืนลิงก์ Google Drive
+        async function uploadImageToDrive(file) {
+            const base64Data = await fileToBase64(file);
+            const res = await fetch(UPLOAD_FUNCTION_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'apikey': SUPABASE_ANON_KEY
+                },
+                body: JSON.stringify({
+                    filename: `${Date.now()}_${file.name}`,
+                    mimeType: file.type,
+                    base64Data
+                })
+            });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.error || 'อัปโหลดรูปไม่สำเร็จ');
+            return result.url;
+        }
+
+        // 6. ฟังก์ชันส่งเรื่องแจ้งซ่อมผ่าน RPC (อัปโหลดรูปก่อน ถ้ามี)
         async function submitRepairRequest() {
             const empCode = empInput.value.trim();
             const roomId = roomSelect.value;
             const description = document.getElementById('description').value.trim();
+            const file1 = document.getElementById('image_1').files[0];
+            const file2 = document.getElementById('image_2').files[0];
 
             if (!empCode || !roomId || !description) {
                 showStatus('กรุณากรอกข้อมูลให้ครบถ้วน (รหัสพนักงาน, สถานที่, รายละเอียด)', 'error');
@@ -294,13 +390,28 @@
 
             const submitBtn = document.getElementById('submitBtn');
             submitBtn.disabled = true;
-            submitBtn.textContent = 'กำลังส่งเรื่อง...';
 
             try {
+                let imageUrl1 = null;
+                let imageUrl2 = null;
+
+                if (file1) {
+                    submitBtn.textContent = 'กำลังอัปโหลดรูปที่ 1...';
+                    imageUrl1 = await uploadImageToDrive(file1);
+                }
+                if (file2) {
+                    submitBtn.textContent = 'กำลังอัปโหลดรูปที่ 2...';
+                    imageUrl2 = await uploadImageToDrive(file2);
+                }
+
+                submitBtn.textContent = 'กำลังส่งเรื่อง...';
+
                 const { data, error } = await supabaseClient.rpc('submit_repair_request', {
                     p_emp_code: empCode,
                     p_room_id: roomId,
-                    p_description: description
+                    p_description: description,
+                    p_image_url_1: imageUrl1,
+                    p_image_url_2: imageUrl2
                 });
 
                 if (error) throw error;
