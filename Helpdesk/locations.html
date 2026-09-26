@@ -1,242 +1,254 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="dark">
 <head>
-<meta charset="UTF-8">
-<title>จัดการสถานที่ | ระบบแจ้งซ่อมอาคารและสถานที่</title>
-<style>
-  * { box-sizing: border-box; margin:0; padding:0; font-family: 'Sarabun', 'Segoe UI', sans-serif; }
-  body { background:#f0f9ff; color:#1e293b; display:flex; min-height:100vh; }
-
-  .sidebar {
-    width:240px;
-    background:linear-gradient(180deg, #0f766e 0%, #115e59 100%);
-    color:#fff; display:flex; flex-direction:column;
-    position:fixed; height:100vh;
-    box-shadow:2px 0 12px rgba(0,0,0,.08);
-  }
-  .sidebar-header { padding:22px 20px; border-bottom:1px solid rgba(255,255,255,.15); }
-  .sidebar-header h2 { font-size:17px; font-weight:700; letter-spacing:.3px; }
-  .sidebar-menu { display:flex; flex-direction:column; padding:12px 0; flex:1; }
-  .sidebar-menu a {
-    padding:12px 20px; color:#ccfbf1; text-decoration:none;
-    font-size:14.5px; display:block; margin:2px 10px; border-radius:8px;
-    transition:all .2s ease;
-  }
-  .sidebar-menu a:hover { background:rgba(255,255,255,.12); color:#fff; transform:translateX(2px); }
-  .sidebar-menu a.active { background:#14b8a6; color:#fff; font-weight:600; box-shadow:0 4px 10px rgba(20,184,166,.35); }
-
-  .content { margin-left:240px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
-  .page-body { flex:1; padding:30px; }
-  h1 { font-size:24px; color:#0f766e; font-weight:700; }
-
-  .card {
-    background:#fff; border-radius:14px; padding:22px;
-    box-shadow:0 4px 16px rgba(15,118,110,.06);
-    border:1px solid #e0f2f1; margin-bottom:20px;
-  }
-  .form-group { margin-bottom:14px; }
-  .form-group label { display:block; margin-bottom:5px; font-weight:600; font-size:13px; color:#334155; }
-  .form-group input {
-    width:100%; padding:10px 12px; border:1px solid #cbd5e1;
-    border-radius:9px; font-size:14px; background:#f8fafc; transition:all .2s;
-  }
-  .form-group input:focus {
-    outline:none; border-color:#14b8a6; background:#fff;
-    box-shadow:0 0 0 3px rgba(20,184,166,.15);
-  }
-
-  .btn {
-    padding:9px 18px; border:none; border-radius:9px;
-    cursor:pointer; font-size:13.5px; font-weight:600;
-    transition:all .2s;
-  }
-  .btn:hover { transform:translateY(-1px); box-shadow:0 4px 10px rgba(0,0,0,.12); }
-  .btn-primary { background:linear-gradient(135deg,#14b8a6,#0f766e); color:#fff; }
-  .btn-primary:hover { box-shadow:0 6px 16px rgba(20,184,166,.35); }
-  .btn-warning { background:#f59e0b; color:#fff; }
-  .btn-danger { background:#ef4444; color:#fff; }
-  .btn-secondary { background:#94a3b8; color:#fff; }
-
-  table { width:100%; border-collapse:collapse; margin-top:12px; }
-  th, td { padding:12px 10px; border-bottom:1px solid #e0f2f1; text-align:left; font-size:14px; }
-  th { background:#ccfbf1; color:#0f766e; font-weight:700; font-size:13px; }
-  tr:hover td { background:#f0fdfa; }
-
-  .app-footer {
-    text-align:center; padding:16px; font-size:13px;
-    color:#64748b; border-top:1px solid #e0f2f1; background:#fff;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จัดการสถานที่ - ระบบแจ้งซ่อมอาคารและสถานที่</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#121214',
+                        cardBg: '#1a1a1e',
+                        cardBorder: '#27272a',
+                        primaryRed: '#e53e3e',
+                        primaryRedHover: '#fc8181',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
 </head>
-<body>
+<body class="bg-darkBg text-zinc-100 min-h-screen flex flex-col selection:bg-primaryRed selection:text-white">
 
-  <aside class="sidebar">
-    <div class="sidebar-header"><h2>🛠️ ระบบแจ้งซ่อม</h2></div>
-    <nav class="sidebar-menu">
-      <a href="request.html">📋 แจ้งซ่อม / ติดตาม</a>
-      <a href="dashboard.html">📊 Dashboard</a>
-      <a href="approve.html">✅ อนุมัติงาน</a>
-      <a href="reports.html">📈 รายงาน</a>
-      <a href="locations.html" class="active">🏢 จัดการสถานที่</a>
-      <a href="#" onclick="logout()">🚪 ออกจากระบบ</a>
-    </nav>
-  </aside>
+    <!-- Top Navbar -->
+    <header class="border-b border-cardBorder bg-darkBg/85 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primaryRed to-red-800 flex items-center justify-center shadow-lg shadow-red-900/30">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </div>
+                <span class="font-bold text-lg tracking-wide">Facility<span class="text-primaryRed">Fix</span></span>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <span class="text-xs text-zinc-400 hidden sm:inline">จัดการข้อมูลสถานที่</span>
+                <div class="w-9 h-9 rounded-full bg-zinc-800 border border-cardBorder flex items-center justify-center text-sm font-semibold text-zinc-300">
+                    SC
+                </div>
+            </div>
+        </div>
+    </header>
 
-  <div class="content">
-    <div class="page-body">
-      <h1>จัดการข้อมูลสถานที่ (อาคาร / ชั้น / ห้อง)</h1>
-      <p style="color:#64748b; margin-bottom:20px; font-size:14px;">เพิ่ม แก้ไข หรือลบสถานที่สำหรับใช้ในฟอร์มแจ้งซ่อม</p>
+    <!-- Main Container with Sidebar & Content -->
+    <div class="flex-1 max-w-7xl w-full mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-full md:w-64 space-y-2">
+            <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 shadow-xl">
+                <nav class="space-y-1 text-sm font-medium">
+                    <a href="index.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/50 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        <span>แจ้งซ่อม</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/50 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        <span>ติดตามสถานะ</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/50 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/50 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>อนุมัติงาน</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/50 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span>รายงาน</span>
+                    </a>
+                    <a href="locations.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-primaryRed/10 text-primaryRed font-semibold transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <span>จัดการสถานที่</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
 
-      <div class="card" style="max-width:500px;">
-        <h3 id="formTitle" style="margin-bottom:15px; color:#0f766e; font-size:16px;">➕ เพิ่มสถานที่ใหม่</h3>
-        <form id="locationForm">
-          <input type="hidden" id="locId">
-          <div class="form-group">
-            <label>ชื่ออาคาร</label>
-            <input type="text" id="building" placeholder="เช่น อาคาร A" required>
-          </div>
-          <div class="form-group">
-            <label>ชั้น</label>
-            <input type="text" id="floor" placeholder="เช่น 1 หรือ ชั้นลอย" required>
-          </div>
-          <div class="form-group">
-            <label>ห้อง / พื้นที่</label>
-            <input type="text" id="room" placeholder="เช่น ห้องประชุมใหญ่" required>
-          </div>
-          <div style="display:flex; gap:10px;">
-            <button type="submit" class="btn btn-primary" id="saveBtn">บันทึกข้อมูล</button>
-            <button type="button" class="btn btn-secondary" id="cancelBtn" style="display:none;" onclick="resetForm()">ยกเลิก</button>
-          </div>
-        </form>
-      </div>
+        <!-- Main Content Area -->
+        <main class="flex-1 space-y-6">
+            <!-- Form Card -->
+            <div class="bg-cardBg border border-cardBorder rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+                <div class="absolute -top-24 -right-24 w-48 h-48 bg-primaryRed/10 rounded-full blur-3xl pointer-events-none"></div>
 
-      <div class="card">
-        <h3 style="color:#0f766e; font-size:16px;">รายการสถานที่ทั้งหมด</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>อาคาร</th>
-              <th>ชั้น</th>
-              <th>ห้อง / พื้นที่</th>
-              <th style="width:150px;">จัดการ</th>
-            </tr>
-          </thead>
-          <tbody id="locationList">
-            <tr><td colspan="4" style="text-align:center; color:#94a3b8;">กำลังโหลดข้อมูล...</td></tr>
-          </tbody>
-        </table>
-      </div>
+                <div class="mb-6">
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight">เพิ่ม / แก้ไขข้อมูลสถานที่</h1>
+                    <p class="text-sm text-zinc-400 mt-1">กำหนดชื่ออาคาร ชั้น และห้องสำหรับให้พนักงานเลือกในระบบแจ้งซ่อม</p>
+                </div>
+
+                <form id="locationForm" class="space-y-4">
+                    <input type="hidden" id="loc_id">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">ชื่ออาคาร</label>
+                            <input type="text" id="building" placeholder="เช่น อาคาร A" class="w-full bg-zinc-900/50 border border-cardBorder rounded-xl px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:border-primaryRed transition-colors" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">ชั้น</label>
+                            <input type="text" id="floor" placeholder="เช่น ชั้น 2" class="w-full bg-zinc-900/50 border border-cardBorder rounded-xl px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:border-primaryRed transition-colors" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">ห้อง / พื้นที่</label>
+                            <input type="text" id="room" placeholder="เช่น ห้องประชุมใหญ่" class="w-full bg-zinc-900/50 border border-cardBorder rounded-xl px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:border-primaryRed transition-colors" required>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-3 pt-2">
+                        <button type="submit" class="bg-primaryRed hover:bg-red-700 text-white font-medium py-2.5 px-6 rounded-xl transition-all duration-200 shadow-lg shadow-red-900/30 text-sm">
+                            บันทึกข้อมูล
+                        </button>
+                        <button type="button" id="cancelBtn" class="hidden bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-medium py-2.5 px-4 rounded-xl transition-colors text-sm">
+                            ยกเลิก
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Table Card -->
+            <div class="bg-cardBg border border-cardBorder rounded-2xl p-6 shadow-xl">
+                <h2 class="text-lg font-bold mb-4">รายการสถานที่ทั้งหมด</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-zinc-300">
+                        <thead class="border-b border-cardBorder text-zinc-400 text-xs uppercase tracking-wider">
+                            <tr>
+                                <th class="py-3 px-4">อาคาร</th>
+                                <th class="py-3 px-4">ชั้น</th>
+                                <th class="py-3 px-4">ห้อง / พื้นที่</th>
+                                <th class="py-3 px-4 text-right">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="locationTableBody" class="divide-y divide-cardBorder/50">
+                            <tr>
+                                <td colspan="4" class="py-4 text-center text-zinc-500">กำลังโหลดข้อมูล...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
     </div>
 
-    <footer class="app-footer">
-      ระบบแจ้งซ่อมอาคารและสถานที่ | พัฒนาโดย Sarawut.C
+    <!-- Footer -->
+    <footer class="py-6 text-center text-xs text-zinc-500 border-t border-cardBorder mt-auto">
+        &copy; 2026 Facility Fix System. พัฒนาโดย Sarawut.C
     </footer>
-  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const SUPABASE_URL = "https://fuarmmweqxxhczavkvqp.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1YXJtbXdlcXh4aGN6YXZrdnFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMjgzMTcsImV4cCI6MjEwMzgwNDMxN30.n7s4gKOkCvaOSpFSf9FGmWsqi7eAzFe28c_oJWy8NSE";
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    <!-- Supabase & Script Integration -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://fuarmmweqxxhczavkvqp.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1YXJtbXdlcXh4aGN6YXZrdnFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMjgzMTcsImV4cCI6MjEwMzgwNDMxN30.n7s4gKOkCvaOSpFSf9FGmWsqi7eAzFe28c_oJWy8NSE';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function checkAuth() {
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      if (!session) { window.location.href = 'login.html'; return; }
-      loadLocations();
-    }
-    checkAuth();
+        const form = document.getElementById('locationForm');
+        const tableBody = document.getElementById('locationTableBody');
+        const cancelBtn = document.getElementById('cancelBtn');
 
-    async function logout() {
-      await supabaseClient.auth.signOut();
-      window.location.href = 'login.html';
-    }
+        async function fetchLocations() {
+            const { data, error } = await supabaseClient
+                .from('repair_locations')
+                .select('*')
+                .order('building', { ascending: true });
 
-    async function loadLocations() {
-      const { data, error } = await supabaseClient
-        .from('repair_locations')
-        .select('*')
-        .order('building', { ascending: true });
+            if (error) {
+                console.error('Error:', error);
+                return;
+            }
 
-      const tbody = document.getElementById('locationList');
-      tbody.innerHTML = '';
+            if (!data || data.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-zinc-500">ไม่พบข้อมูลสถานที่</td></tr>`;
+                return;
+            }
 
-      if (error || !data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">ยังไม่มีข้อมูลสถานที่</td></tr>';
-        return;
-      }
+            tableBody.innerHTML = data.map(loc => `
+                <tr class="hover:bg-zinc-900/35 transition-colors">
+                    <td class="py-3.5 px-4 font-medium text-zinc-100">${loc.building}</td>
+                    <td class="py-3.5 px-4">${loc.floor}</td>
+                    <td class="py-3.5 px-4">${loc.room || '-'}</td>
+                    <td class="py-3.5 px-4 text-right space-x-2">
+                        <button onclick="editLocation('${loc.id}', '${loc.building}', '${loc.floor}', '${loc.room || ''}')" class="text-xs text-zinc-400 hover:text-primaryRed transition-colors">แก้ไข</button>
+                        <button onclick="deleteLocation('${loc.id}')" class="text-xs text-red-400 hover:text-red-300 transition-colors">ลบ</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
 
-      data.forEach(loc => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${loc.building}</td>
-            <td>${loc.floor}</td>
-            <td>${loc.room}</td>
-            <td>
-              <button class="btn btn-warning" style="padding:5px 10px; font-size:12px;" onclick="editLocation('${loc.id}', '${loc.building}', '${loc.floor}', '${loc.room}')">แก้ไข</button>
-              <button class="btn btn-danger" style="padding:5px 10px; font-size:12px;" onclick="deleteLocation('${loc.id}')">ลบ</button>
-            </td>
-          </tr>
-        `;
-      });
-    }
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('loc_id').value;
+            const building = document.getElementById('building').value;
+            const floor = document.getElementById('floor').value;
+            const room = document.getElementById('room').value;
 
-    document.getElementById('locationForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const id = document.getElementById('locId').value;
-      const building = document.getElementById('building').value.trim();
-      const floor = document.getElementById('floor').value.trim();
-      const room = document.getElementById('room').value.trim();
+            if (id) {
+                // Update
+                const { error } = await supabaseClient
+                    .from('repair_locations')
+                    .update({ building, floor, room })
+                    .eq('id', id);
+                if (error) alert('Error: ' + error.message);
+            } else {
+                // Insert
+                const { error } = await supabaseClient
+                    .from('repair_locations')
+                    .insert([{ building, floor, room }]);
+                if (error) alert('Error: ' + error.message);
+            }
 
-      if (id) {
-        const { error } = await supabaseClient
-          .from('repair_locations')
-          .update({ building, floor, room })
-          .eq('id', id);
-        if (error) { alert('เกิดข้อผิดพลาด: ' + error.message); return; }
-        alert('อัปเดตข้อมูลสำเร็จ');
-      } else {
-        const { error } = await supabaseClient
-          .from('repair_locations')
-          .insert([{ building, floor, room }]);
-        if (error) { alert('เกิดข้อผิดพลาด: ' + error.message); return; }
-        alert('เพิ่มสถานที่สำเร็จ');
-      }
+            form.reset();
+            document.getElementById('loc_id').value = '';
+            cancelBtn.classList.add('hidden');
+            fetchLocations();
+        });
 
-      resetForm();
-      loadLocations();
-    });
+        window.editLocation = (id, building, floor, room) => {
+            document.getElementById('loc_id').value = id;
+            document.getElementById('building').value = building;
+            document.getElementById('floor').value = floor;
+            document.getElementById('room').value = room;
+            cancelBtn.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
 
-    function editLocation(id, building, floor, room) {
-      document.getElementById('locId').value = id;
-      document.getElementById('building').value = building;
-      document.getElementById('floor').value = floor;
-      document.getElementById('room').value = room;
-      document.getElementById('formTitle').textContent = '✏️ แก้ไขข้อมูลสถานที่';
-      document.getElementById('saveBtn').textContent = 'อัปเดต';
-      document.getElementById('cancelBtn').style.display = 'inline-block';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+        window.deleteLocation = async (id) => {
+            if (confirm('คุณต้องการลบสถานที่นี้ใช่หรือไม่?')) {
+                const { error } = await supabaseClient
+                    .from('repair_locations')
+                    .delete()
+                    .eq('id', id);
+                if (error) alert('Error: ' + error.message);
+                fetchLocations();
+            }
+        };
 
-    async function deleteLocation(id) {
-      if (!confirm('คุณต้องการลบสถานที่นี้ใช่หรือไม่?')) return;
-      const { error } = await supabaseClient
-        .from('repair_locations')
-        .delete()
-        .eq('id', id);
-      if (error) {
-        alert('ไม่สามารถลบได้ เนื่องจากอาจมีประวัติการแจ้งซ่อมผูกอยู่กับสถานที่นี้');
-        return;
-      }
-      loadLocations();
-    }
+        cancelBtn.addEventListener('click', () => {
+            form.reset();
+            document.getElementById('loc_id').value = '';
+            cancelBtn.classList.add('hidden');
+        });
 
-    function resetForm() {
-      document.getElementById('locationForm').reset();
-      document.getElementById('locId').value = '';
-      document.getElementById('formTitle').textContent = '➕ เพิ่มสถานที่ใหม่';
-      document.getElementById('saveBtn').textContent = 'บันทึกข้อมูล';
-      document.getElementById('cancelBtn').style.display = 'none';
-    }
-  </script>
+        document.addEventListener('DOMContentLoaded', fetchLocations);
+    </script>
 </body>
 </html>
