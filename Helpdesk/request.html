@@ -40,13 +40,12 @@
                 </div>
                 <span class="font-bold text-lg tracking-wide">แจ้งซ่อม<span class="text-primaryRed">อาคารและสถานที่</span></span>
             </div>
-            </div>
         </div>
     </header>
 
     <!-- Main Container with Sidebar & Content -->
     <div class="flex-1 max-w-7xl w-full mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
-        
+
         <!-- Sidebar Navigation -->
         <aside class="w-full md:w-64 space-y-2">
             <div class="bg-cardBg border border-cardBorder rounded-2xl p-4 shadow-xl">
@@ -89,12 +88,15 @@
                     <p class="text-sm text-zinc-400 mt-1">กรอกข้อมูลรหัสพนักงานและรายละเอียดเพื่อส่งเรื่องไปยังเจ้าหน้าที่ผู้รับผิดชอบ</p>
                 </div>
 
+                <!-- Status message box -->
+                <div id="statusBox" class="hidden mb-6 rounded-xl px-4 py-3 text-sm"></div>
+
                 <form class="space-y-6">
                     <!-- Employee ID & Auto-fetch Info -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">รหัสพนักงาน</label>
-                            <input type="text" id="emp_id" placeholder="เช่น EMP-00124" class="w-full bg-zinc-900/50 border border-cardBorder rounded-xl px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:border-primaryRed transition-colors">
+                            <input type="text" id="emp_code" placeholder="เช่น EMP-00124" class="w-full bg-zinc-900/50 border border-cardBorder rounded-xl px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:border-primaryRed transition-colors">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">ชื่อ-นามสกุล / แผนก</label>
@@ -102,25 +104,36 @@
                         </div>
                     </div>
 
-                    <!-- Location Dropdown (Supabase Data) -->
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">สถานที่แจ้งซ่อม</label>
-                        <select id="location_select" class="w-full bg-zinc-900/50 border border-cardBorder rounded-xl px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-primaryRed transition-colors">
-                            <option value="">-- เลือกสถานที่ / โซนอาคาร (ดึงจาก Supabase) --</option>
-                            <option value="fl1">ชั้น 1 - โถงต้อนรับและประชาสัมพันธ์</option>
-                            <option value="fl2">ชั้น 2 - ห้องประชุมใหญ่รวม</option>
-                            <option value="fl3">ชั้น 3 - แผนกปฏิบัติการและไอที</option>
-                        </select>
+                    <!-- Location Cascading Dropdowns -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">อาคาร</label>
+                            <select id="building_select" class="w-full bg-zinc-900/50 border border-cardBorder rounded-xl px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-primaryRed transition-colors">
+                                <option value="">-- เลือกอาคาร --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">ชั้น</label>
+                            <select id="floor_select" disabled class="w-full bg-zinc-900/50 border border-cardBorder rounded-xl px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-primaryRed transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                                <option value="">-- เลือกอาคารก่อน --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">ห้อง / โซน</label>
+                            <select id="room_select" disabled class="w-full bg-zinc-900/50 border border-cardBorder rounded-xl px-4 py-3 text-sm text-zinc-300 focus:outline-none focus:border-primaryRed transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                                <option value="">-- เลือกชั้นก่อน --</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Problem Description -->
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">รายละเอียดปัญหา / อาการชำรุด</label>
-                        <textarea rows="4" placeholder="ระบุรายละเอียดหรือจุดที่ต้องการให้ซ่อมแซม..." class="w-full bg-zinc-900/50 border border-cardBorder rounded-xl px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:border-primaryRed transition-colors resize-none"></textarea>
+                        <textarea rows="4" id="description" placeholder="ระบุรายละเอียดหรือจุดที่ต้องการให้ซ่อมแซม..." class="w-full bg-zinc-900/50 border border-cardBorder rounded-xl px-4 py-3 text-sm text-zinc-100 focus:outline-none focus:border-primaryRed transition-colors resize-none"></textarea>
                     </div>
 
                     <!-- Submit Button -->
-                    <button type="button" class="w-full bg-primaryRed hover:bg-red-700 text-white font-medium py-3.5 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-red-900/30 active:scale-[0.99]">
+                    <button type="button" id="submitBtn" class="w-full bg-primaryRed hover:bg-red-700 text-white font-medium py-3.5 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-red-900/30 active:scale-[0.99] disabled:opacity-50">
                         ยืนยันการส่งเรื่องแจ้งซ่อม
                     </button>
                 </form>
@@ -132,98 +145,178 @@
     <footer class="py-6 text-center text-xs text-zinc-500 border-t border-cardBorder mt-auto">
         &copy; 2026 Facility Fix System. พัฒนาโดย Sarawut.C
     </footer>
+
     <!-- Supabase Client CDN -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-    // ตั้งค่าการเชื่อมต่อ Supabase (เปลี่ยนเป็น URL และ Anon Key ของคุณ)
-    const SUPABASE_URL = 'https://fuarmmweqxxhczavkvqp.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1YXJtbXdlcXh4aGN6YXZrdnFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMjgzMTcsImV4cCI6MjEwMzgwNDMxN30.n7s4gKOkCvaOSpFSf9FGmWsqi7eAzFe28c_oJWy8NSE';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // ตั้งค่าการเชื่อมต่อ Supabase
+        const SUPABASE_URL = 'https://fuarmmweqxxhczavkvqp.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1YXJtbXdlcXh4aGN6YXZrdnFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMjgzMTcsImV4cCI6MjEwMzgwNDMxN30.n7s4gKOkCvaOSpFSf9FGmWsqi7eAzFe28c_oJWy8NSE'; // <-- ใส่ anon key จริงตรงนี้
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // 1. โหลดข้อมูลสถานที่เมื่อหน้าเว็บโหลดเสร็จ
-    document.addEventListener('DOMContentLoaded', async () => {
-        const selectElement = document.getElementById('location_select');
-        try {
-            const { data, error } = await supabaseClient
-                .from('repair_locations')
-                .select('*')
-                .order('location_name', { ascending: true });
+        const statusBox = document.getElementById('statusBox');
+        function showStatus(message, type) {
+            statusBox.textContent = message;
+            statusBox.className = 'mb-6 rounded-xl px-4 py-3 text-sm ' +
+                (type === 'error'
+                    ? 'bg-red-500/10 text-red-400 border border-red-500/30'
+                    : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30');
+        }
 
-            if (error) throw error;
+        const buildingSelect = document.getElementById('building_select');
+        const floorSelect = document.getElementById('floor_select');
+        const roomSelect = document.getElementById('room_select');
 
-            if (data && data.length > 0) {
-                selectElement.innerHTML = '<option value="">-- เลือกสถานที่ / โซนอาคาร --</option>';
-                data.forEach(loc => {
-                    const option = document.createElement('option');
-                    option.value = loc.id;
-                    option.textContent = loc.location_name;
-                    selectElement.appendChild(option);
+        // 1. โหลดรายการอาคารตอนเปิดหน้า
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('buildings')
+                    .select('*')
+                    .order('name', { ascending: true });
+
+                if (error) throw error;
+
+                buildingSelect.innerHTML = '<option value="">-- เลือกอาคาร --</option>';
+                (data || []).forEach(b => {
+                    const opt = document.createElement('option');
+                    opt.value = b.id;
+                    opt.textContent = b.name;
+                    buildingSelect.appendChild(opt);
                 });
+            } catch (err) {
+                console.error('Error loading buildings:', err.message);
+                showStatus('โหลดรายการอาคารไม่สำเร็จ: ' + err.message, 'error');
             }
-        } catch (err) {
-            console.error('Error loading locations:', err.message);
-        }
-    });
+        });
 
-    // 2. ตรวจสอบรหัสพนักงานอัตโนมัติเมื่อพิมพ์เสร็จ
-    const empInput = document.getElementById('emp_id');
-    const empInfoInput = document.getElementById('emp_info');
+        // 2. เมื่อเลือกอาคาร -> โหลดชั้น
+        buildingSelect.addEventListener('change', async () => {
+            floorSelect.innerHTML = '<option value="">-- เลือกชั้น --</option>';
+            roomSelect.innerHTML = '<option value="">-- เลือกชั้นก่อน --</option>';
+            floorSelect.disabled = true;
+            roomSelect.disabled = true;
 
-    empInput.addEventListener('blur', async () => {
-        const empId = empInput.value.trim();
-        if (!empId) return;
+            const buildingId = buildingSelect.value;
+            if (!buildingId) return;
 
-        try {
-            const { data, error } = await supabaseClient
-                .from('employees')
-                .select('name, department')
-                .eq('employee_id', empId)
-                .single();
+            try {
+                const { data, error } = await supabaseClient
+                    .from('floors')
+                    .select('*')
+                    .eq('building_id', buildingId)
+                    .order('sort_order', { ascending: true });
 
-            if (error || !data) {
-                empInfoInput.value = 'ไม่พบข้อมูลพนักงานนี้';
-                empInfoInput.classList.add('text-red-400');
-            } else {
-                empInfoInput.value = `${data.name} (${data.department})`;
-                empInfoInput.classList.remove('text-red-400');
-                empInfoInput.classList.add('text-zinc-200');
+                if (error) throw error;
+
+                (data || []).forEach(f => {
+                    const opt = document.createElement('option');
+                    opt.value = f.id;
+                    opt.textContent = f.name;
+                    floorSelect.appendChild(opt);
+                });
+                floorSelect.disabled = false;
+            } catch (err) {
+                console.error('Error loading floors:', err.message);
+                showStatus('โหลดรายการชั้นไม่สำเร็จ: ' + err.message, 'error');
             }
-        } catch (err) {
-            console.error('Error fetching employee:', err);
+        });
+
+        // 3. เมื่อเลือกชั้น -> โหลดห้อง/โซน
+        floorSelect.addEventListener('change', async () => {
+            roomSelect.innerHTML = '<option value="">-- เลือกห้อง/โซน --</option>';
+            roomSelect.disabled = true;
+
+            const floorId = floorSelect.value;
+            if (!floorId) return;
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('rooms')
+                    .select('*')
+                    .eq('floor_id', floorId)
+                    .order('name', { ascending: true });
+
+                if (error) throw error;
+
+                (data || []).forEach(r => {
+                    const opt = document.createElement('option');
+                    opt.value = r.id;
+                    opt.textContent = r.name;
+                    roomSelect.appendChild(opt);
+                });
+                roomSelect.disabled = false;
+            } catch (err) {
+                console.error('Error loading rooms:', err.message);
+                showStatus('โหลดรายการห้อง/โซนไม่สำเร็จ: ' + err.message, 'error');
+            }
+        });
+
+        // 4. ตรวจสอบรหัสพนักงานอัตโนมัติเมื่อพิมพ์เสร็จ (emp_code)
+        const empInput = document.getElementById('emp_code');
+        const empInfoInput = document.getElementById('emp_info');
+
+        empInput.addEventListener('blur', async () => {
+            const empCode = empInput.value.trim();
+            if (!empCode) return;
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('employees')
+                    .select('name, department')
+                    .eq('emp_code', empCode)
+                    .single();
+
+                if (error || !data) {
+                    empInfoInput.value = 'ไม่พบข้อมูลพนักงานนี้';
+                    empInfoInput.classList.add('text-red-400');
+                    empInfoInput.classList.remove('text-zinc-200');
+                } else {
+                    empInfoInput.value = `${data.name} (${data.department})`;
+                    empInfoInput.classList.remove('text-red-400');
+                    empInfoInput.classList.add('text-zinc-200');
+                }
+            } catch (err) {
+                console.error('Error fetching employee:', err.message);
+            }
+        });
+
+        // 5. ฟังก์ชันส่งเรื่องแจ้งซ่อมผ่าน RPC
+        async function submitRepairRequest() {
+            const empCode = empInput.value.trim();
+            const roomId = roomSelect.value;
+            const description = document.getElementById('description').value.trim();
+
+            if (!empCode || !roomId || !description) {
+                showStatus('กรุณากรอกข้อมูลให้ครบถ้วน (รหัสพนักงาน, สถานที่, รายละเอียด)', 'error');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'กำลังส่งเรื่อง...';
+
+            try {
+                const { data, error } = await supabaseClient.rpc('submit_repair_request', {
+                    p_emp_code: empCode,
+                    p_room_id: roomId,
+                    p_description: description
+                });
+
+                if (error) throw error;
+
+                showStatus('ส่งเรื่องแจ้งซ่อมสำเร็จ! เลขที่เอกสาร: ' + data, 'success');
+                setTimeout(() => location.reload(), 2000);
+            } catch (err) {
+                console.error('Submit error:', err.message);
+                showStatus('เกิดข้อผิดพลาดในการส่งข้อมูล: ' + err.message, 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'ยืนยันการส่งเรื่องแจ้งซ่อม';
+            }
         }
-    });
 
-    // 3. ฟังก์ชันส่งเรื่องแจ้งซ่อมผ่าน RPC
-    async function submitRepairRequest() {
-        const empId = empInput.value.trim();
-        const locationId = document.getElementById('location_select').value;
-        const description = document.querySelector('textarea').value.trim();
+        document.getElementById('submitBtn').addEventListener('click', submitRepairRequest);
+    </script>
 
-        if (!empId || !locationId || !description) {
-            alert('กรุณากรอกข้อมูลให้ครบถ้วน');
-            return;
-        }
-
-        try {
-            const { data, error } = await supabaseClient.rpc('submit_repair_request', {
-                p_employee_id: empId,
-                p_location_id: locationId,
-                p_description: description
-            });
-
-            if (error) throw error;
-
-            alert('ส่งเรื่องแจ้งซ่อมสำเร็จ! เลขที่เอกสาร: ' + (data || 'REQ-SUCCESS'));
-            location.reload();
-        } catch (err) {
-            alert('เกิดข้อผิดพลาดในการส่งข้อมูล: ' + err.message);
-        }
-    }
-
-    // ผูกฟังก์ชันเข้ากับปุ่มส่งข้อมูล
-    document.querySelector('button[type="button"]').addEventListener('click', submitRepairRequest);
-</script>
-
-  
 </body>
 </html>
